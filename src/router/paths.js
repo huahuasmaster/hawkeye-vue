@@ -39,5 +39,21 @@ export default [
     path: '/upgrade',
     name: 'Upgrade to PRO',
     view: 'Upgrade'
+  },
+  {
+    path: '/test',
+    view: 'ChartsTest'
+  },
+  {
+    path: '/datasource',
+    view: 'Datasource'
+  },
+  {
+    path: '/metricvariable',
+    view: 'MetricVariable'
+  },
+  {
+    path: '/dashboardv2',
+    view: 'DashboardV2'
   }
 ]

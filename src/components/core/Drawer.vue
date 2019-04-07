@@ -85,11 +85,27 @@ import {
 export default {
   data: () => ({
     logo: './img/vuetifylogo.png',
+    // 计划侧栏子项：看板，数据源配置，指标变量配置，链路追踪（图表配置）
     links: [
       {
         to: '/dashboard',
         icon: 'mdi-view-dashboard',
-        text: 'Dashboard'
+        text: '看板'
+      },
+      {
+        to: '/dashboardv2',
+        icon: 'mdi-view-dashboard',
+        text: '看板'
+      },
+      {
+        to: '/datasource',
+        icon: 'mdi-dns',
+        text: '数据源'
+      },
+      {
+        to: '/metricvariable',
+        icon: 'mdi-alphabetical',
+        text: '指标变量'
       },
       {
         to: '/user-profile',
