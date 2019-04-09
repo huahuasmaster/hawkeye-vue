@@ -4,8 +4,20 @@
             class="v-card--material-chart"
             v-on="$listeners"
     >
-        <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom"
+<!--        折线图-->
+        <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
                  v-if="chartDetail.type === 'line'" height="360px"></ve-line>
+<!--        柱状图-->
+        <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom"
+                 v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>
+
+<!--        饼图，只有一个维度和一个指标（数量）-->
+        <ve-pie :data="chartData" :colors="colors" slot="header"
+                      v-if="chartDetail.type === 'pie'" ></ve-pie>
+
+        漏斗图，只有一个维度和一个指标（数量）
+        <ve-funnel :data="chartData" :colors="colors" slot="header"
+                v-if="chartDetail.type === 'funnel'" ></ve-funnel>
 
         <h4 class="title font-weight-light">{{chartDetail.name}}</h4>
         <p class="category d-inline-flex font-weight-light">{{chartDetail.desc}}</p>
@@ -51,22 +63,19 @@
                 ],
                 dataZoom: [{type: 'slider'}],
                 chartData:{
-                    columns: ['日期', '访问用户', '下单用户', '下单率'],
-                    rows: [
-                        {'日期': '1/1', '访问用户': 1393, '下单用户': 1093, '下单率': 0.32},
-                        {'日期': '1/2', '访问用户': 3530, '下单用户': 3230, '下单率': 0.26},
-                        {'日期': '1/3', '访问用户': 2923, '下单用户': 2623, '下单率': 0.76},
-                        {'日期': '1/4', '访问用户': 1723, '下单用户': 1423, '下单率': 0.49},
-                        {'日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323},
-                        {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
-                    ]
+                    columns: [],
+                    rows: []
                 },
                 metricList:[],
             }
         },
 
+        computed: {
+          readyToShow() {return this.chartData && this.chartData.columns && this.chartData.columns.length >= 1},
+        },
+
         methods: {
-            // 根据现有的各项参数获取数据
+            // 根据传入的图标配置的各项参数获取数据
             getMetric() {
                 this.chartData.rows = [];
                 this.chartData.columns = [];
@@ -79,6 +88,11 @@
                     period: '1小时',
                     filter: {},
                 };
+
+                // columns：指标和维度的展示名集合
+                const columns = new Set();
+                columns.add('xAxis');
+                columns.add('下单量');
                 Chart.getViewByChart(1,params)
                     .then((resp) => {
                         console.log(resp);
@@ -88,21 +102,16 @@
                             // 如果查询时间间距大于一天，则显示日期
                             row.xAxis = intervalMs >= one_day ? moment(result.timestamp).format('MM/DD H:mm ') : moment(result.timestamp).format('H:mm ');
                             row['下单量'] = result.data.length > 0 ? result.data[0].count : 0;
-                            console.log('row:')
-                            console.log(row);
+                            // console.log('row:');
+                            // console.log(row);
                             this.chartData.rows.push(row);
                         });
                         this.chartData.columns = Array.from(columns);
                         console.log(this.chartData);
                     });
-                // columns：指标和维度的展示名集合
-                const columns = new Set();
-                columns.add('xAxis');
-                columns.add('下单量');
-                console.log('results');
-                console.log(this.metricList);
 
-
+                // console.log('results');
+                // console.log(this.metricList);
             },
         },
 
