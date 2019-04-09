@@ -11,22 +11,9 @@
                     lg4
             >
                 <VChartBaseCard
-                        color="red"
-
+                        color="white"
+                        :chart-detail="chartDetail"
                 >
-                    <ve-line :data="chartData" :colors="colors" slot="header" :theme="VChartsTheme"></ve-line>
-                    <h4 class="title font-weight-light">Email Subscription</h4>
-                    <p class="category d-inline-flex font-weight-light">Last Campaign Performance</p>
-
-                    <template slot="actions">
-                        <v-icon
-                                class="mr-2"
-                                small
-                        >
-                            mdi-clock-outline
-                        </v-icon>
-                        <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
-                    </template>
                 </VChartBaseCard>
             </v-flex>
             <v-flex
@@ -495,34 +482,25 @@
                     1: false,
                     2: false
                 },
-                colors: [
-                    '#4caf50',
-                    '#82B1FF',
-                    '#f55a4e',
-                    '#495057',
-                ],
-                dataZoom:[
-                    {
-                        type: 'slider',//这个 dataZoom 组件是 inside 型 dataZoom 组件（能在坐标系内进行拖动，以及用滚轮（或移动触屏上的两指滑动）进行缩放）
-                        show: true,
-                        xAxisIndex: 0,//控制x轴
-                        start: 10,
-                        end: 60
-
-                    }
-                ],
-                chartData: {
-                    columns: ['日期', '访问用户', '下单用户', '下单率'],
-                    rows: [
-                        {'日期': '1/1', '访问用户': 1393, '下单用户': 1093, '下单率': 0.32},
-                        {'日期': '1/2', '访问用户': 3530, '下单用户': 3230, '下单率': 0.26},
-                        {'日期': '1/3', '访问用户': 2923, '下单用户': 2623, '下单率': 0.76},
-                        {'日期': '1/4', '访问用户': 1723, '下单用户': 1423, '下单率': 0.49},
-                        {'日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323},
-                        {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
-                    ]
+                chartDetail: {
+                    type:'line',
+                    data:{
+                        columns: ['日期', '访问用户', '下单用户', '下单率'],
+                        rows: [
+                            {'日期': '1/1', '访问用户': 1393, '下单用户': 1093, '下单率': 0.32},
+                            {'日期': '1/2', '访问用户': 3530, '下单用户': 3230, '下单率': 0.26},
+                            {'日期': '1/3', '访问用户': 2923, '下单用户': 2623, '下单率': 0.76},
+                            {'日期': '1/4', '访问用户': 1723, '下单用户': 1423, '下单率': 0.49},
+                            {'日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323},
+                            {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
+                        ]
+                    },
+                    name:"电子书城下单量",
+                    desc:"每日下单量，下单不等于支付"
                 },
-                VChartsTheme
+
+                theme: JSON.parse(VChartsTheme.themeJSON),
+                themeName: VChartsTheme.themeName,
             }
         },
         methods: {
