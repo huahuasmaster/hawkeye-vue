@@ -73,8 +73,8 @@
                 let params = {
                     chartId: 1,
                     intervals: [{
-                        startTime: 1554775200000,
-                        endTime: 1554800400000 + 1000 * 60 * 60 *2,
+                        startTime: new Date().valueOf() - 1000 * 60 * 60 * 7,
+                        endTime: new Date().valueOf() + 1000 * 60 * 60,
                     }],
                     period: '1小时',
                     filter: {},
@@ -84,7 +84,7 @@
                         console.log(resp);
                         this.metricList = resp.metricList;
                         this.metricList.forEach((result) => {
-                            let row = {}, intervalMs = 1554800400000 - 1554775200000;
+                            let row = {}, intervalMs = 1000 * 60 * 60 * 8;
                             // 如果查询时间间距大于一天，则显示日期
                             row.xAxis = intervalMs >= one_day ? moment(result.timestamp).format('MM/DD H:mm ') : moment(result.timestamp).format('H:mm ');
                             row['下单量'] = result.data.length > 0 ? result.data[0].count : 0;
