@@ -1,14 +1,18 @@
 <template>
     <div>
-    <ve-line :data="chartData" :colors="colors"></ve-line>
-    <VariablePanel></VariablePanel>
+        <ve-line :data="chartData" :colors="colors"></ve-line>
+        <VariablePanel></VariablePanel>
+        <MyDatetimePicker :label="'开始时间'" :default-date="new Date().valueOf()" v-on:pick_datetime="params => log(params)"></MyDatetimePicker>
+
     </div>
 </template>
 
 <script>
     import VariablePanel from '../components/material/VariablePanel'
+    import MyDatetimePicker from '../components/material/MyDatetimePicker';
+
     export default {
-        components: {VariablePanel},
+        components: {VariablePanel, MyDatetimePicker},
         data: function () {
             return {
                 colors: [
@@ -29,6 +33,11 @@
                         {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
                     ]
                 }
+            }
+        },
+        methods: {
+            log(item) {
+                console.log(item);
             }
         }
     }

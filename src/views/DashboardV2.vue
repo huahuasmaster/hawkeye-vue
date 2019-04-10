@@ -1,4 +1,32 @@
 <template>
+    <div>
+        <v-toolbar
+                id="core-toolbar"
+                app
+                color="bg-default"
+                prominent
+        >
+            <div class="v-toolbar-title">
+                <v-toolbar-title
+                        class="tertiary--text font-weight-light"
+                >
+                    Duangduang下单看板
+                </v-toolbar-title>
+            </div>
+
+            <v-spacer />
+            <v-toolbar-items>
+                <v-flex
+                        align-center
+                        layout
+                        py-2
+                >
+                    <v-btn color="default v-btn--simple">Link One</v-btn>
+                    <v-btn color="default v-btn--simple">Link Two</v-btn>
+                    <v-btn color="default v-btn--simple">Link Three</v-btn>
+                </v-flex>
+            </v-toolbar-items>
+        </v-toolbar>
     <v-container
             fill-height
             fluid
@@ -334,6 +362,7 @@
             </v-flex>
         </v-layout>
     </v-container>
+    </div>
 </template>
 
 <script>
