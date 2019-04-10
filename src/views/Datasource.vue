@@ -1,141 +1,349 @@
 <template>
-    <material-card
-            color="green"
-    >
-        <template slot="header">
-            <v-container
-                    fill-height
-                    fluid
-                    grid-list-xl
-                    style="padding: 0px"
-            >
-                <v-layout wrap>
-                    <v-flex>
-                        <h4
-                                class="title font-weight-light mb-2"
-                                v-text="'MYSQL数据源'"
-                        />
-                        <p
-                                class="category font-weight-thin"
-                                v-text="'需要数据库开启binlog'"
-                        />
-                    </v-flex>
-                    <v-spacer></v-spacer>
-                    <v-flex>
-                        <v-btn color="success" style="float: right;">新增</v-btn>
-                    </v-flex>
-                </v-layout>
-            </v-container>
-
-        </template>
-        <v-data-table
-                :headers="headers"
-                :items="items"
-                hide-actions
+    <div>
+        <material-card
+                color="green"
         >
-            <template
-                    slot="headerCell"
-                    slot-scope="{ header }"
+            <template slot="header">
+                <v-container
+                        fill-height
+                        fluid
+                        grid-list-xl
+                        style="padding: 0px"
+                >
+                    <v-layout wrap>
+                        <v-flex>
+                            <h4
+                                    class="title font-weight-light mb-2"
+                                    v-text="'MYSQL数据源'"></h4>
+                            <p
+                                    class="category font-weight-thin"
+                                    v-text="'需要数据库开启binlog'"></p>
+                        </v-flex>
+                        <v-spacer></v-spacer>
+                        <v-flex>
+                            <v-btn color="success" style="float: right;" @click="newDatasource">新增</v-btn>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+
+            </template>
+            <v-data-table
+                    :headers="headers"
+                    :items="items"
+                    hide-actions
             >
+                <template
+                        slot="headerCell"
+                        slot-scope="{ header }"
+                >
               <span
                       class="font-weight-light text-warning text--darken-3"
-                      v-text="header.text"
-              />
-            </template>
-            <template
-                    slot="items"
-                    slot-scope="{ index, item }"
-            >
-                <td>{{ index + 1 }}</td>
-                <td>{{ item.name }}</td>
-                <td class="text-xs-right">{{ item.salary }}</td>
-                <td class="text-xs-right">{{ item.country }}</td>
-                <td class="text-xs-right">{{ item.city }}</td>
-                <td class="justify-center layout px-0">
-                    <v-icon
-                            class="mr-2"
-                            color="success"
+                      v-text="header.text"></span>
+                </template>
+                <template
+                        slot="items"
+                        slot-scope="{ index, item }"
+                >
+                    <td>{{ item.id}}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ JSON.stringify(item.config) }}</td>
+                    <td>{{ item.queryGranularity }}</td>
 
-                            @click="editItem(item)"
-                    >
-                        mdi-pencil
-                    </v-icon>
-                    <v-icon
-                            color="error"
-                            @click="deleteItem(item)"
-                    >
-                        mdi-close
-                    </v-icon>
-                </td>
+                    <td>
+                        <v-switch v-model="item.enable"></v-switch>
+                    </td>
+                    <td class="justify-center layout px-0">
+                        <v-icon color="success"
+                                class="mr-2"
+
+                                @click="checkVariables(item)"
+                        >
+                            mdi-alphabetical
+                        </v-icon>
+                        <v-icon
+                                class="mr-2"
+                                color="success"
+
+                                @click="editMysql(item)"
+                        >
+                            mdi-pencil
+                        </v-icon>
+                        <v-icon
+                                color="error"
+                                @click="deleteMysql(item)"
+                        >
+                            mdi-close
+                        </v-icon>
+                    </td>
+                </template>
+            </v-data-table>
+        </material-card>
+        <material-card
+                color="green"
+        >
+            <template slot="header">
+                <v-container
+                        fill-height
+                        fluid
+                        grid-list-xl
+                        style="padding: 0px"
+                >
+                    <v-layout wrap>
+                        <v-flex>
+                            <h4
+                                    class="title font-weight-light mb-2"
+                                    v-text="'埋点数据源'"></h4>
+                            <p
+                                    class="category font-weight-thin"
+                                    v-text="'监听前端的埋点消息'"></p>
+                        </v-flex>
+                        <v-spacer></v-spacer>
+                        <v-flex>
+                            <v-btn color="success" style="float: right;" @click="newDatasource">新增</v-btn>
+                        </v-flex>
+                    </v-layout>
+                </v-container>
+
             </template>
-        </v-data-table>
-    </material-card>
+            <v-data-table
+                    :headers="buryHeaders"
+                    :items="buryItems"
+                    hide-actions
+            >
+                <template
+                        slot="headerCell"
+                        slot-scope="{ header }"
+                >
+              <span
+                      class="font-weight-light text-warning text--darken-3"
+                      v-text="header.text"></span>
+                </template>
+                <template
+                        slot="items"
+                        slot-scope="{ index, item }"
+                >
+                    <td>{{ item.id}}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.desc }}</td>
+                    <td>{{ JSON.stringify(item.config) }}</td>
+                    <td>{{ item.queryGranularity }}</td>
+
+                    <td>
+                        <v-switch v-model="item.enable"></v-switch>
+                    </td>
+                    <td class="justify-center layout px-0">
+                        <v-icon
+                                class="mr-2"
+                                color="success"
+
+                                @click="editMysql(item)"
+                        >
+                            mdi-pencil
+                        </v-icon>
+                        <v-icon
+                                color="error"
+                                @click="deleteMysql(item)"
+                        >
+                            mdi-close
+                        </v-icon>
+                    </td>
+                </template>
+            </v-data-table>
+        </material-card>
+        <v-dialog v-model="showForm" width="500">
+            <v-card>
+                <v-card-title
+                        class="headline grey lighten-2"
+                        primary-title
+                >
+                    新建数据源
+                </v-card-title>
+                <DatasourceForm></DatasourceForm>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 <script>
-export default {
-    data() {
-        return {
-            items: [
-                {
-                    name: 'Dakota Rice',
-                    country: 'Niger',
-                    city: 'Oud-Tunrhout',
-                    salary: '$35,738'
-                },
-                {
-                    name: 'Minerva Hooper',
-                    country: 'Curaçao',
-                    city: 'Sinaai-Waas',
-                    salary: '$23,738'
-                }, {
-                    name: 'Sage Rodriguez',
-                    country: 'Netherlands',
-                    city: 'Overland Park',
-                    salary: '$56,142'
-                }, {
-                    name: 'Philip Chanley',
-                    country: 'Korea, South',
-                    city: 'Gloucester',
-                    salary: '$38,735'
-                }, {
-                    name: 'Doris Greene',
-                    country: 'Malawi',
-                    city: 'Feldkirchen in Kārnten',
-                    salary: '$63,542'
-                }
-            ],
-            headers: [
-                {
-                    sortable: false,
-                    text: 'ID',
-                    value: 'id'
-                },
-                {
-                    sortable: false,
-                    text: 'Name',
-                    value: 'name'
-                },
-                {
-                    sortable: false,
-                    text: 'Salary',
-                    value: 'salary',
-                    align: 'right'
-                },
-                {
-                    sortable: false,
-                    text: 'Country',
-                    value: 'country',
-                    align: 'right'
-                },
-                {
-                    sortable: false,
-                    text: 'City',
-                    value: 'city',
-                    align: 'right'
-                },
-                { text: 'Actions', value: 'name', sortable: false,align:'center' }
-            ],
+    import DatasourceForm from '../components/form/DatasourceForm'
+    export default {
+        components: {DatasourceForm},
+        data() {
+            return {
+                items: [
+                    {
+                        id: 1,
+                        name: 'duangduang.t_order',
+                        config: {
+                            database: 'duangduang',
+                            table: 't_order',
+                        },
+                        queryGranularity: '1天',
+                        enable: true,
+                    },
+                    {
+                        id: 1,
+                        name: 'duangduang.t_order',
+                        config: {
+                            database: 'duangduang',
+                            table: 't_order',
+                        },
+                        queryGranularity: '1小时',
+
+                        enable: true,
+                    }, {
+                        id: 1,
+                        name: 'duangduang.t_order',
+                        config: {
+                            database: 'duangduang',
+                            table: 't_order',
+                        },
+                        queryGranularity: '1分钟',
+
+                        enable: false,
+                    }, {
+                        id: 1,
+                        name: 'duangduang.t_order',
+                        config: {
+                            database: 'duangduang',
+                            table: 't_order',
+                        },
+                        queryGranularity: '1秒',
+
+                        enable: true,
+                    },
+                ],
+                buryItems: [
+                    {
+                        id: 6,
+                        name: 'duangduang.login',
+                        config: {
+                            event: 'login',
+                        },
+                        desc: 'duangduang登录事件',
+                        queryGranularity: '1小时',
+                        enable: false,
+                    },
+                    {
+                        id: 7,
+                        name: 'duangduang.place_order',
+                        config: {
+                            event: 'place_order',
+                        },
+                        queryGranularity: '1天',
+
+                        desc: 'duangduang下单事件',
+                        enable: true,
+                    }, {
+                        id: 8,
+                        name: 'duangduang.pay_order',
+                        config: {
+                            event: 'pay_order',
+                        },
+                        queryGranularity: '1分钟',
+
+                        desc: 'duangduang支付订单',
+                        enable: true,
+                    },
+                ],
+                headers: [
+                    {
+                        sortable: false,
+                        text: 'ID',
+                        value: 'id',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '名称',
+                        value: 'name',
+                        align: 'left'
+
+                    },
+                    // {
+                    //     sortable: false,
+                    //     text: '描述',
+                    //     value: 'desc',
+                    //     align: 'right'
+                    // },
+                    {
+                        sortable: false,
+                        text: '配置信息',
+                        value: 'config',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '预聚合粒度',
+                        value: 'queryGranularity',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '状态',
+                        value: 'enable',
+                        align: 'left'
+                    },
+
+                    {text: 'Actions', value: 'name', sortable: false, align: 'center'}
+                ],
+                buryHeaders: [
+                    {
+                        sortable: false,
+                        text: 'ID',
+                        value: 'id',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '名称',
+                        value: 'name',
+                        align: 'left'
+
+                    },
+                    {
+                        sortable: false,
+                        text: '描述',
+                        value: 'desc',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '配置信息',
+                        value: 'config',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '预聚合粒度',
+                        value: 'queryGranularity',
+                        align: 'left'
+                    },
+                    {
+                        sortable: false,
+                        text: '状态',
+                        value: 'enable',
+                        align: 'left'
+                    },
+                    {text: 'Actions', value: 'name', sortable: false, align: 'center'}
+                ],
+                showForm: false,
+            }
+        },
+        methods: {
+            editMysql(item) {
+                console.log("想要编辑：");
+                console.log(item);
+            },
+            deleteMysql(item) {
+                console.log("想要删除：");
+                console.log(item);
+            },
+            checkVariables(item) {
+
+            },
+            newDatasource(type) {
+                this.showForm = true;
+            }
         }
     }
-}
 </script>

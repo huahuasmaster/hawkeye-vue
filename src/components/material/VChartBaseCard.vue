@@ -15,7 +15,7 @@
         <ve-pie :data="chartData" :colors="colors" slot="header"
                       v-if="chartDetail.type === 'pie'" ></ve-pie>
 
-        漏斗图，只有一个维度和一个指标（数量）
+        <!--漏斗图，只有一个维度和一个指标（数量）-->
         <ve-funnel :data="chartData" :colors="colors" slot="header"
                 v-if="chartDetail.type === 'funnel'" ></ve-funnel>
 

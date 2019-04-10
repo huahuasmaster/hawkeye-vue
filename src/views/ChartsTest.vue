@@ -1,9 +1,14 @@
 <template>
+    <div>
     <ve-line :data="chartData" :colors="colors"></ve-line>
+    <VariablePanel></VariablePanel>
+    </div>
 </template>
 
 <script>
+    import VariablePanel from '../components/material/VariablePanel'
     export default {
+        components: {VariablePanel},
         data: function () {
             return {
                 colors: [
