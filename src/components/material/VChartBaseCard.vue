@@ -1,37 +1,48 @@
 <template>
-    <material-card
-            v-bind="$attrs"
-            class="v-card--material-chart"
-            v-on="$listeners"
-    >
-<!--        折线图-->
-        <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
-                 v-if="chartDetail.type === 'line'" height="360px"></ve-line>
-<!--        柱状图-->
-        <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom"
-                 v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>
+    <div>
+        <material-card
+                v-if="chartDetail.type !== 'stats'"
+                v-bind="$attrs"
+                class="v-card--material-chart"
+                v-on="$listeners"
+        >
+            <!--        折线图-->
+            <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
+                     v-if="chartDetail.type === 'line'" height="360px"></ve-line>
+            <!--        柱状图-->
+            <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom"
+                          v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>
 
-<!--        饼图，只有一个维度和一个指标（数量）-->
-        <ve-pie :data="chartData" :colors="colors" slot="header"
-                      v-if="chartDetail.type === 'pie'" ></ve-pie>
+            <!--        饼图，只有一个维度和一个指标（数量）-->
+            <ve-pie :data="chartData" :colors="colors" slot="header"
+                    v-if="chartDetail.type === 'pie'"></ve-pie>
 
-        <!--漏斗图，只有一个维度和一个指标（数量）-->
-        <ve-funnel :data="chartData" :colors="colors" slot="header"
-                v-if="chartDetail.type === 'funnel'" ></ve-funnel>
+            <!--漏斗图，只有一个维度和一个指标（数量）-->
+            <ve-funnel :data="chartData" :colors="colors" slot="header"
+                       v-if="chartDetail.type === 'funnel'"></ve-funnel>
 
-        <h4 class="title font-weight-light">{{chartDetail.name}}</h4>
-        <p class="category d-inline-flex font-weight-light">{{chartDetail.desc}}</p>
+            <h4 class="title font-weight-light">{{chartDetail.name}}</h4>
+            <p class="category d-inline-flex font-weight-light">{{chartDetail.desc}}</p>
 
-        <template slot="actions">
-            <v-icon
-                    class="mr-2"
-                    small
-            >
-                mdi-clock-outline
-            </v-icon>
-            <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
-        </template>
-    </material-card>
+            <template slot="actions">
+                <v-icon
+                        class="mr-2"
+                        small
+                >
+                    mdi-clock-outline
+                </v-icon>
+                <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
+            </template>
+        </material-card>
+        <material-stats-card
+                v-if="chartDetail.type === 'stats'"
+                color="green"
+                icon="mdi-store"
+                :title="chartDetail.name"
+                :value="wholeStats"
+                sub-icon="mdi-calendar"
+                :sub-text="chartDetail.desc"></material-stats-card>
+    </div>
 </template>
 
 <script>
@@ -53,6 +64,16 @@
 
         props: ['chartDetail', 'queryInterval', 'showStyle', 'extraFilters'],
 
+        watch: {
+            queryInterval: {
+                handler(to, from) {
+                    // console.log("事件发生了变化，起始时间：%s 结束时间：%s",this.queryInterval.startTime,this.queryInterval.endTime);
+                    this.getMetric();
+                },
+                deep: true
+            }
+        },
+
         data() {
             return {
                 colors: [
@@ -62,41 +83,60 @@
                     '#495057',
                 ],
                 dataZoom: [{type: 'slider'}],
-                chartData:{
+                chartData: {
                     columns: [],
                     rows: []
                 },
-                metricList:[],
+                metricList: [],
             }
         },
 
         computed: {
-          readyToShow() {return this.chartData && this.chartData.columns && this.chartData.columns.length >= 1},
+            readyToShow() {
+                return this.chartData && this.chartData.columns && this.chartData.columns.length >= 1
+            },
+            wholeStats() {
+                return this.chartDetail.extra.prefix + this.chartData + this.chartDetail.extra.suffix;
+            }
         },
 
         methods: {
             // 根据传入的图标配置的各项参数获取数据
             getMetric() {
-                this.chartData.rows = [];
-                this.chartData.columns = [];
+
                 let params = {
-                    chartId: 1,
+                    chartId: this.chartDetail.id,
                     intervals: [{
-                        startTime: new Date().valueOf() - 1000 * 60 * 60 * 7,
-                        endTime: new Date().valueOf() + 1000 * 60 * 60,
+                        startTime: this.queryInterval.startTime,
+                        endTime: this.queryInterval.endTime,
                     }],
-                    period: '1小时',
+                    period: this.chartDetail.period,
                     filter: {},
                 };
+
 
                 // columns：指标和维度的展示名集合
                 const columns = new Set();
                 columns.add('xAxis');
                 columns.add('下单量');
-                Chart.getViewByChart(1,params)
+                Chart.getViewByChart(1, params)
                     .then((resp) => {
                         console.log(resp);
                         this.metricList = resp.metricList;
+
+                        // stats图表需要特殊处理
+                        if (this.chartDetail.type === 'stats') {
+                            if (this.metricList.length <= 0 || this.metricList[0].data.length <= 0) {
+                                this.chartData = 0;
+                            } else {
+                                this.chartData = this.metricList[0].data[0].amount_sum;
+                            }
+                            return;
+                        }
+
+                        this.chartData.rows = [];
+                        this.chartData.columns = [];
+
                         this.metricList.forEach((result) => {
                             let row = {}, intervalMs = 1000 * 60 * 60 * 8;
                             // 如果查询时间间距大于一天，则显示日期
@@ -107,7 +147,7 @@
                             this.chartData.rows.push(row);
                         });
                         this.chartData.columns = Array.from(columns);
-                        console.log(this.chartData);
+                        // console.log(this.chartData);
                     });
 
                 // console.log('results');

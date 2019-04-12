@@ -9,15 +9,16 @@
             transition="scale-transition"
             offset-y
             full-width
-            min-width="290px"
+            min-width="310px"
     >
         <template v-slot:activator="{ on }">
             <v-text-field
+                    dark
                     ref="text"
                     v-model="wholeDate"
-                    :label="label"
-                    prepend-icon="mdi-event"
+                    :prefix="label"
                     v-on="on"
+                    style="color: white"
             ></v-text-field>
         </template>
         <v-date-picker v-model="date" dark v-if="!showTime">

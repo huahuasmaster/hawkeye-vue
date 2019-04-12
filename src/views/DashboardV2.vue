@@ -3,7 +3,7 @@
         <v-toolbar
                 id="core-toolbar"
                 app
-                color="bg-default"
+                color="bg-warning"
                 prominent
         >
             <div class="v-toolbar-title">
@@ -14,364 +14,62 @@
                 </v-toolbar-title>
             </div>
 
-            <v-spacer />
+            <v-spacer/>
             <v-toolbar-items>
                 <v-flex
                         align-center
                         layout
                         py-2
                 >
-                    <v-btn color="default v-btn--simple">Link One</v-btn>
-                    <v-btn color="default v-btn--simple">Link Two</v-btn>
-                    <v-btn color="default v-btn--simple">Link Three</v-btn>
+                    <span style="color:white" class="font-weight-light">开始：</span>
+                    <MyDatetimePicker :default-date="globalInterval.startTime"
+                                      v-on:pick_datetime="time => globalInterval.startTime = time"
+                                      style="margin-right: 16px"></MyDatetimePicker>
+                    <span style="color:white" class="font-weight-light">结束：</span>
+                    <MyDatetimePicker :default-date="globalInterval.endTime"
+                                      v-on:pick_datetime="time => globalInterval.endTime = time"></MyDatetimePicker>
                 </v-flex>
             </v-toolbar-items>
         </v-toolbar>
-    <v-container
-            fill-height
-            fluid
-            grid-list-xl
-    >
-        <v-layout wrap>
-            <v-flex
-                    md12
-                    sm12
-                    lg4
-            >
-                <VChartBaseCard
-                        color="white"
-                        :chart-detail="chartDetail"
+        <v-container
+                fill-height
+                fluid
+                grid-list-xl
+        >
+            <v-layout wrap>
+                <v-flex
+                        md12
+                        sm12
+                        lg6
+                        v-for="item in chartDetails"
                 >
-                </VChartBaseCard>
-            </v-flex>
-            <v-flex
-                    md12
-                    sm12
-                    lg4
-            >
-                <material-chart-card
-                        :data="emailsSubscriptionChart.data"
-                        :options="emailsSubscriptionChart.options"
-                        :responsive-options="emailsSubscriptionChart.responsiveOptions"
-                        color="red"
-                        type="Bar"
-                >
-                    <h4 class="title font-weight-light">Email Subscription</h4>
-                    <p class="category d-inline-flex font-weight-light">Last Campaign Performance</p>
+                    <VChartBaseCard
 
-                    <template slot="actions">
-                        <v-icon
-                                class="mr-2"
-                                small
-                        >
-                            mdi-clock-outline
-                        </v-icon>
-                        <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
-                    </template>
-                </material-chart-card>
-            </v-flex>
-            <v-flex
-                    md12
-                    sm12
-                    lg4
-            >
-                <material-chart-card
-                        :data="dataCompletedTasksChart.data"
-                        :options="dataCompletedTasksChart.options"
-                        color="green"
-                        type="Line"
-                >
-                    <h3 class="title font-weight-light">Completed Tasks</h3>
-                    <p class="category d-inline-flex font-weight-light">Last Last Campaign Performance</p>
-
-                    <template slot="actions">
-                        <v-icon
-                                class="mr-2"
-                                small
-                        >
-                            mdi-clock-outline
-                        </v-icon>
-                        <span class="caption grey--text font-weight-light">campaign sent 26 minutes ago</span>
-                    </template>
-                </material-chart-card>
-            </v-flex>
-            <v-flex
-                    sm6
-                    xs12
-                    md6
-                    lg3
-            >
-                <material-stats-card
-                        color="green"
-                        icon="mdi-store"
-                        title="Revenue"
-                        value="$34,245"
-                        sub-icon="mdi-calendar"
-                        sub-text="Last 24 Hours"
-                />
-            </v-flex>
-            <v-flex
-                    sm6
-                    xs12
-                    md6
-                    lg3
-            >
-                <material-stats-card
-                        color="orange"
-                        icon="mdi-content-copy"
-                        title="Used Space"
-                        value="49/50"
-                        small-value="GB"
-                        sub-icon="mdi-alert"
-                        sub-icon-color="error"
-                        sub-text="Get More Space..."
-                        sub-text-color="text-primary"
-                />
-            </v-flex>
-            <v-flex
-                    sm6
-                    xs12
-                    md6
-                    lg3
-            >
-                <material-stats-card
-                        color="red"
-                        icon="mdi-information-outline"
-                        title="Fixed Issues"
-                        value="75"
-                        sub-icon="mdi-tag"
-                        sub-text="Tracked from Github"
-                />
-            </v-flex>
-            <v-flex
-                    sm6
-                    xs12
-                    md6
-                    lg3
-            >
-                <material-stats-card
-                        color="info"
-                        icon="mdi-twitter"
-                        title="Followers"
-                        value="+245"
-                        sub-icon="mdi-update"
-                        sub-text="Just Updated"
-                />
-            </v-flex>
-            <v-flex
-                    md12
-                    lg6
-            >
-                <material-card
-                        color="orange"
-                        title="Employee Stats"
-                        text="New employees on 15th September, 2016"
-                >
-                    <v-data-table
-                            :headers="headers"
-                            :items="items"
-                            hide-actions
+                            color="white"
+                            :chart-detail="item"
+                            :query-interval="globalInterval"
                     >
-                        <template
-                                slot="headerCell"
-                                slot-scope="{ header }"
-                        >
-              <span
-                      class="font-weight-light text-warning text--darken-3"
-                      v-text="header.text"
-              />
-                        </template>
-                        <template
-                                slot="items"
-                                slot-scope="{ index, item }"
-                        >
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ item.name }}</td>
-                            <td class="text-xs-right">{{ item.salary }}</td>
-                            <td class="text-xs-right">{{ item.country }}</td>
-                            <td class="text-xs-right">{{ item.city }}</td>
-                        </template>
-                    </v-data-table>
-                </material-card>
-            </v-flex>
-            <v-flex
-                    md12
-                    lg6
-            >
-                <material-card
-                        class="card-tabs"
-                        color="green">
-                    <v-flex
-                            slot="header"
-                    >
-                        <v-tabs
-                                v-model="tabs"
-                                color="transparent"
-                                slider-color="white"
-                        >
-              <span
-                      class="subheading font-weight-light mr-3"
-                      style="align-self: center"
-              >Tasks:</span>
-                            <v-tab class="mr-3">
-                                <v-icon class="mr-2">mdi-bug</v-icon>
-                                Bugs
-                            </v-tab>
-                            <v-tab class="mr-3">
-                                <v-icon class="mr-2">mdi-code-tags</v-icon>
-                                Website
-                            </v-tab>
-                            <v-tab>
-                                <v-icon class="mr-2">mdi-cloud</v-icon>
-                                Server
-                            </v-tab>
-                        </v-tabs>
-                    </v-flex>
-
-                    <v-tabs-items v-model="tabs">
-                        <v-tab-item
-                                v-for="n in 3"
-                                :key="n"
-                        >
-                            <v-list three-line>
-                                <v-list-tile @click="complete(0)">
-                                    <v-list-tile-action>
-                                        <v-checkbox
-                                                :value="list[0]"
-                                                color="green"
-                                        />
-                                    </v-list-tile-action>
-                                    <v-list-tile-title>
-                                        Sign contract for "What are conference organized afraid of?"
-                                    </v-list-tile-title>
-                                    <div class="d-flex">
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="success"
-                                                    icon
-                                            >
-                                                <v-icon color="primary">mdi-pencil</v-icon>
-                                            </v-btn>
-                                            <span>Edit</span>
-                                        </v-tooltip>
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="danger"
-                                                    icon
-                                            >
-                                                <v-icon color="error">mdi-close</v-icon>
-                                            </v-btn>
-                                            <span>Close</span>
-                                        </v-tooltip>
-
-                                    </div>
-                                </v-list-tile>
-                                <v-divider/>
-                                <v-list-tile @click="complete(1)">
-                                    <v-list-tile-action>
-                                        <v-checkbox
-                                                :value="list[1]"
-                                                color="success"
-                                        />
-                                    </v-list-tile-action>
-                                    <v-list-tile-title>
-                                        Lines From Great Russian Literature? Or E-mails From My Boss?
-                                    </v-list-tile-title>
-                                    <div class="d-flex">
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="success"
-                                                    icon
-                                            >
-                                                <v-icon color="primary">mdi-pencil</v-icon>
-                                            </v-btn>
-                                            <span>Edit</span>
-                                        </v-tooltip>
-
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="danger"
-                                                    icon>
-                                                <v-icon color="error">mdi-close</v-icon>
-                                            </v-btn>
-                                            <span>Close</span>
-                                        </v-tooltip>
-                                    </div>
-                                </v-list-tile>
-                                <v-divider/>
-                                <v-list-tile @click="complete(2)">
-                                    <v-list-tile-action>
-                                        <v-checkbox
-                                                :value="list[2]"
-                                                color="success"
-                                        />
-                                    </v-list-tile-action>
-                                    <v-list-tile-title>
-                                        Flooded: One year later, assessing what was lost and what was found when a ravaging rain swept through metro Detroit
-                                    </v-list-tile-title>
-                                    <div class="d-flex">
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="success"
-                                                    icon
-                                            >
-                                                <v-icon color="primary">mdi-pencil</v-icon>
-                                            </v-btn>
-                                            <span>Edit</span>
-                                        </v-tooltip>
-                                        <v-tooltip
-                                                top
-                                                content-class="top">
-                                            <v-btn
-                                                    slot="activator"
-                                                    class="v-btn--simple"
-                                                    color="danger"
-                                                    icon
-                                            >
-                                                <v-icon color="error">mdi-close</v-icon>
-                                            </v-btn>
-                                            <span>Close</span>
-                                        </v-tooltip>
-
-                                    </div>
-                                </v-list-tile>
-                            </v-list>
-                        </v-tab-item>
-                    </v-tabs-items>
-                </material-card>
-            </v-flex>
-        </v-layout>
-    </v-container>
+                    </VChartBaseCard>
+                </v-flex>
+            </v-layout>
+        </v-container>
     </div>
 </template>
 
 <script>
     import VChartBaseCard from '../components/material/VChartBaseCard'
     import VChartsTheme from '../plugins/v-charts-theme'
+    import MyDatetimePicker from '../components/material/MyDatetimePicker'
+    import moment from 'moment'
+
     export default {
-        components: {VChartBaseCard},
-        data () {
+        components: {VChartBaseCard, MyDatetimePicker},
+        data() {
             return {
+                globalInterval: {
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 5,
+                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
+                },
                 dailySalesChart: {
                     data: {
                         labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
@@ -511,29 +209,30 @@
                     1: false,
                     2: false
                 },
-                chartDetail: {
-                    type:'line',
-                    data:{
-                        columns: ['日期', '访问用户', '下单用户', '下单率'],
-                        rows: [
-                            {'日期': '1/1', '访问用户': 1393, '下单用户': 1093, '下单率': 0.32},
-                            {'日期': '1/2', '访问用户': 3530, '下单用户': 3230, '下单率': 0.26},
-                            {'日期': '1/3', '访问用户': 2923, '下单用户': 2623, '下单率': 0.76},
-                            {'日期': '1/4', '访问用户': 1723, '下单用户': 1423, '下单率': 0.49},
-                            {'日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323},
-                            {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
-                        ]
-                    },
-                    name:"电子书城下单量",
-                    desc:"每日下单量，下单不等于支付"
-                },
+                chartDetails: [{
+                    id:1,
+                    type: 'line',
+                    period: '15分钟',
+                    name: "电子书城下单量",
+                    desc: "每日下单量，下单不等于支付"
+                },{
+                    id:2,
+                    type: 'stats',
+                    period: 'all',
+                    name: "电子书城订单总金额",
+                    desc: "每日下单总额（人民币），下单不等于支付",
+                    extra: {
+                        prefix: '',
+                        suffix: '元',
+                    }
+                }],
 
                 theme: JSON.parse(VChartsTheme.themeJSON),
                 themeName: VChartsTheme.themeName,
             }
         },
         methods: {
-            complete (index) {
+            complete(index) {
                 this.list[index] = !this.list[index]
             }
         }
