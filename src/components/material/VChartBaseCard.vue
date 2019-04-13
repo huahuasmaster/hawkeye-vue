@@ -138,7 +138,7 @@
                         this.chartData.columns = [];
 
                         this.metricList.forEach((result) => {
-                            let row = {}, intervalMs = 1000 * 60 * 60 * 8;
+                            let row = {}, intervalMs = params.intervals[0].endTime - params.intervals[0].startTime;
                             // 如果查询时间间距大于一天，则显示日期
                             row.xAxis = intervalMs >= one_day ? moment(result.timestamp).format('MM/DD H:mm ') : moment(result.timestamp).format('H:mm ');
                             row['下单量'] = result.data.length > 0 ? result.data[0].count : 0;
