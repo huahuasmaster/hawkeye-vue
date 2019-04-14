@@ -69,7 +69,7 @@
           <!--<v-list-tile-title class="font-weight-light">-->
             <!--Upgrade To PRO-->
           <!--</v-list-tile-title>-->
-        </v-list-tile>
+        <!--</v-list-tile>-->
       </v-layout>
     </v-img>
   </v-navigation-drawer>
