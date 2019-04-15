@@ -1,0 +1,286 @@
+<template>
+    <form style="padding: 24px">
+        <v-select
+                v-model="params.type"
+                :items="types"
+                label="图表类型"
+                item-text="text"
+                item-value="value"
+        ></v-select>
+        <v-text-field
+                v-model="params.name"
+                label="名称"
+                required
+        ></v-text-field>
+        <v-text-field
+                v-model="params.desc"
+                label="描述"
+                required
+        ></v-text-field>
+        <v-select
+                v-model="params.dataSourceId"
+                :items="datasources"
+                label="数据源"
+                item-text="name"
+                item-value="id"
+        ></v-select>
+
+
+        <!------------------------------选择指标------------------------------>
+        <v-container
+                v-for="(item,index) in params.aggregations"
+                :key="'agg'+index"
+
+        >
+            <!--选择指标字段-->
+            <v-layout>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                >
+                    <v-select
+                            v-model="item.metric"
+                            :items="choosedDatasource.metricList"
+                            label="指标字段"
+                    ></v-select>
+                </v-flex>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                >
+                    <v-select
+                            v-model="item.metricAggregationType"
+                            :items="getAggregationsTypeOption(item.metric)"
+                            label="聚合类型"
+                            item-text="k"
+                            item-value="v"
+                    ></v-select>
+                </v-flex>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                >
+                    <v-text-field
+                            v-model="item.alias"
+                            label="别名"
+                            required
+                    ></v-text-field>
+                </v-flex>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                >
+                    <v-btn flat color="success" v-if="params.aggregations.length === index + 1"
+                           @click="putNewEmptyAggregation">新增指标
+                    </v-btn>
+                    <v-btn flat color="error" @click="params.aggregations.splice(index, 1)">删除此项</v-btn>
+                </v-flex>
+            </v-layout>
+        </v-container>
+
+        <!------------------------------选择维度（非必填）------------------------------>
+        <!--<v-select-->
+                <!--v-model="choosedDimensions"-->
+                <!--:items="choosedDatasource.dimensionList"-->
+                <!--v-if="choosedDatasource.dimensionList.length > 1"-->
+                <!--label="分组维度（非必填）"-->
+                <!--multiple-->
+        <!--&gt;</v-select>-->
+        <v-container
+                v-for="(item,index) in params.dimensions"
+                :key="'dimen'+index"
+                v-if="params.type !== 'stats'"
+
+        >
+            <!--选择指标字段-->
+            <v-layout>
+                <v-flex
+                        md5
+                        lg5
+                        xs12
+                >
+                    <v-select
+                            v-model="item.dimensionField"
+                            :items="choosedDatasource.dimensionList"
+                            label="维度字段"
+                    ></v-select>
+                </v-flex>
+
+                <v-flex
+                        md4
+                        lg4
+                        xs12
+                >
+                    <v-text-field
+                            v-model="item.alias"
+                            label="别名"
+                            required
+                    ></v-text-field>
+                </v-flex>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                >
+                    <v-btn flat color="success" v-if="params.dimensions.length === index + 1"
+                           @click="putNewEmptyDimension">新增维度
+                    </v-btn>
+                    <v-btn flat color="error" @click="params.dimensions.splice(index, 1)">删除此项</v-btn>
+                </v-flex>
+            </v-layout>
+        </v-container>
+
+        <!--状态图独占属性：前缀与后缀-->
+        <v-container
+            v-if="this.params.type === 'stats'"
+        >
+            <!--选择指标字段-->
+            <v-layout>
+                <v-flex
+                        md6
+                        lg6
+                        xs12
+                >
+                    <v-text-field
+                            v-model="params.config.prefix"
+                            label="显示前缀"
+                    ></v-text-field>
+                </v-flex>
+
+                <v-flex
+                        md6
+                        lg6
+                        xs12
+                >
+                    <v-text-field
+                            v-model="params.config.suffix"
+                            label="显示后缀"
+                            required
+                    ></v-text-field>
+                </v-flex>
+            </v-layout>
+        </v-container>
+        <v-btn @click="submit" color="success">提交</v-btn>
+        <v-btn @click="clear" color="error">重置</v-btn>
+    </form>
+</template>
+<script>
+    import {Datasource} from "../../url";
+
+    export default {
+        watch: {
+            "params.dataSourceId": {
+                handler(to, from) {
+                    if (this.params.dataSourceId !== 0 && this.params.aggregations.length < 1) {
+                        this.putNewEmptyAggregation();
+                        this.putNewEmptyDimension();
+                    }
+                },
+                deep: true,
+            }
+        },
+        computed: {
+            choosedDatasource() {
+                let result = this.datasources.find(ds => ds.id === this.params.dataSourceId);
+                if (!result) {
+                    result = {metricList: [], dimensionList: []}
+                }
+                return result;
+            },
+        },
+        data() {
+            return {
+                params: {
+                    type: '',
+                    desc: '',
+                    name: '',
+                    dataSourceId: 0,
+                    dashboardId: '',
+                    aggregations: [],
+                    dimensions: [],
+                    filters: [],
+                    config: {},
+                },
+                types: [
+                    {
+                        text: '折线图',
+                        value: 'line',
+                    },
+                    {
+                        text: '状态图',
+                        value: 'stats',
+                    },
+                    {
+                        text: '柱状图',
+                        value: 'histogram'
+                    },
+                    {
+                        text: '饼图',
+                        value: 'pie'
+                    },
+                    {
+                        text: '漏斗图',
+                        value: 'funnel',
+                    }
+                ],
+                datasources: [],
+                choosedDimensions: [],
+            }
+        },
+        methods: {
+            getAggregationsTypeOption(name) {
+                if (this.choosedDatasource && this.choosedDatasource.metricList.length < 1) return [];
+                // let isDistinctVariable = this.variableMetrics.find(v => v.useDistinct && v.queryName === name) != null;
+                // let isDruid = this.formItem.metricQueryType === 'DRUID';
+                // if (isDruid && name === 'count') {
+                if (name === 'count') {
+                    return [{k: '计数:COUNT()', v: 'COUNT'}];
+                } else {
+                    return [{k: '总和', v: 'SUM'}, {k: '最大值', v: 'MAX'},
+                        {k: '最小值', v: 'MIN'}, {k: '去重计数:COUNT(DISTINCT)', v: 'DISTINCT'},
+                        {k: '计数:COUNT()', v: 'COUNT'}];
+                }
+            },
+            putNewEmptyAggregation() {
+                this.params.aggregations.push({
+                    metric: '',
+                    alias: '',
+                    metricAggregationType: '',
+                });
+            },
+            putNewEmptyDimension() {
+                this.params.dimensions.push({
+                    dimensionField: '',
+                    alias:'',
+                });
+            },
+            clear() {
+                this.params = {
+                    type: '',
+                    desc: '',
+                    name: '',
+                    dataSourceId: 0,
+                    dashboardId: '',
+                    aggregations: [],
+                    dimensions: [],
+                    filters: [],
+                    config: {},
+                };
+            },
+            submit() {
+                console.log(this.params);
+            }
+        },
+        mounted() {
+            Datasource.list()
+                .then(resp => {
+                    this.datasources = resp;
+                });
+        },
+    }
+
+</script>

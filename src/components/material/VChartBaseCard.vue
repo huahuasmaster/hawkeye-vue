@@ -80,9 +80,7 @@
                     this.queryTime.interval.startTime = this.queryInterval.startTime;
                     this.queryTime.interval.endTime = this.queryInterval.endTime;
                     console.log('查询时间变化，起始时间：%s 结束时间：%s', this.queryTime.interval.startTime, this.queryTime.interval.endTime);
-                    if (!this.granularityOptions.includes(this.queryTime.period)) {
-                        this.queryTime.period = this.granularityOptions[0];
-                    }
+
                     this.getMetric();
                 },
                 deep: true
@@ -134,10 +132,12 @@
             metrics: function () {
                 let metric = [];
                 this.chartDetail.aggregations.forEach(a => metric.push(a.alias));
-                this.chartDetail.postAggregations.forEach(p => metric.push(p.name));
+                // this.chartDetail.postAggregations.forEach(p => metric.push(p.name));
                 return metric;
             },
             granularityOptions: function () {
+
+
                 let intervalTime = (this.queryTime.interval.endTime - this.queryTime.interval.startTime);
                 console.log('当前时间间隔' + intervalTime + '秒');
                 return period_option.find(o => o.min < intervalTime && o.max >= intervalTime).options;
@@ -183,7 +183,7 @@
                         startTime: this.queryTime.interval.startTime,
                         endTime: this.queryTime.interval.endTime,
                     }],
-                    period: this.queryTime.period,
+                    period: this.chartDetail.type === 'stats' ? 'all' : this.queryTime.period,
                     filter: {},
                 };
 
@@ -242,7 +242,12 @@
                     if (this.metricList.length <= 0 || this.metricList[0].data.length <= 0) {
                         this.chartData = 0;
                     } else {
-                        this.chartData = this.metricList[0].data[0].amount_sum;
+                        let data = this.metricList[0].data[0];
+                        let metricName = this.metrics[0];
+                        console.log('data:');
+                        console.log(data);
+                        console.log(data[metricName]);
+                        this.chartData = data[metricName].toString();
                     }
                     return;
                 }

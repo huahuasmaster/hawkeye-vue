@@ -1,5 +1,5 @@
 {
-  "name": "vuetify-material-dashboard",
+  "name": "hawkeye",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -37,6 +37,7 @@
     "vue-template-compiler": "^2.5.17",
     "vuex": "^3.0.1",
     "vuex-router-sync": "^5.0.0",
-    "webpack": "^4.29.6"
+    "webpack": "^4.29.6",
+    "webpack-bundle-analyzer": "^3.3.2"
   }
 }

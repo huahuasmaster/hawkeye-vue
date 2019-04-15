@@ -28,6 +28,7 @@
                     <span style="color:white" class="font-weight-light">结束：</span>
                     <MyDatetimePicker :default-date="globalInterval.endTime"
                                       v-on:pick_datetime="time => globalInterval.endTime = time"></MyDatetimePicker>
+                    <v-btn flat  color="success" @click="showForm = true">新增</v-btn>
                 </v-flex>
             </v-toolbar-items>
         </v-toolbar>
@@ -53,6 +54,17 @@
                 </v-flex>
             </v-layout>
         </v-container>
+        <v-dialog v-model="showForm" width="1000">
+            <v-card>
+                <v-card-title
+                        class="headline grey lighten-2"
+                        primary-title
+                >
+                    新建图表
+                </v-card-title>
+                <ChartForm></ChartForm>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -61,11 +73,14 @@
     import VChartsTheme from '../plugins/v-charts-theme'
     import MyDatetimePicker from '../components/material/MyDatetimePicker'
     import moment from 'moment'
+    import {Dashboard} from "../url";
+    import ChartForm from "../components/form/ChartForm";
 
     export default {
-        components: {VChartBaseCard, MyDatetimePicker},
+        components: {VChartBaseCard, MyDatetimePicker, ChartForm},
         data() {
             return {
+                showForm: false,
                 globalInterval: {
                     startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 5,
                     endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
@@ -99,9 +114,22 @@
             }
         },
         methods: {
-            complete(index) {
-                this.list[index] = !this.list[index]
+            getChartDetails() {
+                Dashboard.listChartsByDashboardId(1)
+                    .then((resp) => {
+                        console.log('获取到图表配置');
+                        this.chartDetails = resp.map((chart) => {
+                            if(chart.config) {
+                                chart.config = JSON.parse(chart.config);
+                            }
+                            return chart;
+                        });
+                        console.log(this.chartDetails);
+                    });
             }
+        },
+        mounted() {
+            this.getChartDetails();
         }
     }
 </script>

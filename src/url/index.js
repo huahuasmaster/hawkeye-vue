@@ -32,3 +32,11 @@ instance.interceptors.response.use(
 export const Chart = {
     getViewByChart: (chartId, params) => instance.post(`/hawkeye/api/charts/${chartId}/data`, params, {}),
 };
+
+export const Dashboard = {
+    listChartsByDashboardId: (dashboardId) => instance.get(`/hawkeye/api/dashboards/${dashboardId}/charts`),
+};
+
+export const Datasource = {
+    list: () => instance.get(`/hawkeye/api/datasources`),
+};
