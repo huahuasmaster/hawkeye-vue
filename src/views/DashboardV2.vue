@@ -62,7 +62,7 @@
                 >
                     新建图表
                 </v-card-title>
-                <ChartForm></ChartForm>
+                <ChartForm v-on:chart_submit="showForm = false"></ChartForm>
             </v-card>
         </v-dialog>
     </div>
@@ -119,9 +119,9 @@
                     .then((resp) => {
                         console.log('获取到图表配置');
                         this.chartDetails = resp.map((chart) => {
-                            if(chart.config) {
-                                chart.config = JSON.parse(chart.config);
-                            }
+                            // if(chart.config) {
+                            //     chart.config = JSON.parse(chart.config);
+                            // }
                             return chart;
                         });
                         console.log(this.chartDetails);

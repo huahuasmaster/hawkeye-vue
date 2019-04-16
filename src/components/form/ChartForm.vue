@@ -18,7 +18,7 @@
                 required
         ></v-text-field>
         <v-select
-                v-model="params.dataSourceId"
+                v-model="params.datasourceId"
                 :items="datasources"
                 label="数据源"
                 item-text="name"
@@ -169,15 +169,20 @@
     </form>
 </template>
 <script>
-    import {Datasource} from "../../url";
+    import {Datasource, Chart} from "../../url";
 
     export default {
         watch: {
-            "params.dataSourceId": {
+            "params.datasourceId": {
                 handler(to, from) {
-                    if (this.params.dataSourceId !== 0 && this.params.aggregations.length < 1) {
-                        this.putNewEmptyAggregation();
-                        this.putNewEmptyDimension();
+                    console.log(`datasource发生了变更:${this.params.datasourceId}`)
+                    if (this.params.datasourceId !== 0 ) {
+                        if ( this.params.aggregations.length < 1) {
+                            this.putNewEmptyAggregation();
+                        }
+                        if (this.params.dimensions.length < 1) {
+                            this.putNewEmptyDimension();
+                        }
                     }
                 },
                 deep: true,
@@ -185,7 +190,7 @@
         },
         computed: {
             choosedDatasource() {
-                let result = this.datasources.find(ds => ds.id === this.params.dataSourceId);
+                let result = this.datasources.find(ds => ds.id === this.params.datasourceId);
                 if (!result) {
                     result = {metricList: [], dimensionList: []}
                 }
@@ -198,7 +203,7 @@
                     type: '',
                     desc: '',
                     name: '',
-                    dataSourceId: 0,
+                    datasourceId: 0,
                     dashboardId: '',
                     aggregations: [],
                     dimensions: [],
@@ -263,8 +268,8 @@
                     type: '',
                     desc: '',
                     name: '',
-                    dataSourceId: 0,
-                    dashboardId: '',
+                    datasourceId: 1,
+                    dashboardId: 0,
                     aggregations: [],
                     dimensions: [],
                     filters: [],
@@ -272,14 +277,25 @@
                 };
             },
             submit() {
+                this.params.aggregations = this.params.aggregations.filter(agg => agg.metric && agg.metric !== '');
+                this.params.dimensions = this.params.dimensions.filter(dimen => dimen.dimensionField && dimen.dimensionField !== '');
                 console.log(this.params);
+                Chart.add(this.params)
+                    .then(resp => {
+                        console.log('提交成功');
+                        this.$emit('chart_submit');
+                        this.clear();
+                    })
+            },
+            getDatasources() {
+                Datasource.list()
+                    .then(resp => {
+                        this.datasources = resp;
+                    });
             }
         },
         mounted() {
-            Datasource.list()
-                .then(resp => {
-                    this.datasources = resp;
-                });
+            this.getDatasources();
         },
     }
 
