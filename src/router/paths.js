@@ -4,11 +4,11 @@
  * official documentation https://router.vuejs.org/en/
  */
 export default [
-  {
-    path: '/dashboard',
-    // Relative to /src/views
-    view: 'Dashboard'
-  },
+  // {
+  //   path: '/dashboard',
+  //   // Relative to /src/views
+  //   view: 'Dashboard'
+  // },
   {
     path: '/user-profile',
     name: 'User Profile',
@@ -34,11 +34,6 @@ export default [
   {
     path: '/notifications',
     view: 'Notifications'
-  },
-  {
-    path: '/upgrade',
-    name: 'Upgrade to PRO',
-    view: 'Upgrade'
   },
   {
     path: '/test',

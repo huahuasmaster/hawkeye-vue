@@ -135,7 +135,6 @@ vuetify-material-dashboard
 │   ├── main.js
 │   ├── plugins
 │   │   ├── axios.js
-│   │   ├── chartist.js
 │   │   ├── index.js
 │   │   ├── theme.js
 │   │   └── vuetify.js

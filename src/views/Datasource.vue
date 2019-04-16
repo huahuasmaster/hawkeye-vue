@@ -152,12 +152,6 @@
         </material-card>
         <v-dialog v-model="showForm" width="500">
             <v-card>
-                <v-card-title
-                        class="headline grey lighten-2"
-                        primary-title
-                >
-                    新建数据源
-                </v-card-title>
                 <DatasourceForm></DatasourceForm>
             </v-card>
         </v-dialog>
