@@ -27,7 +27,7 @@
                                       style="margin-right: 16px"></MyDatetimePicker>
                     <span style="color:white" class="font-weight-light">结束：</span>
                     <MyDatetimePicker :default-date="globalInterval.endTime"
-                                      v-on:pick_datetime="time => globalInterval.endTime = time"></MyDatetimePicker>
+                                      v-on:pick_datetime="time => injectEndTime"></MyDatetimePicker>
                     <v-btn flat  color="success" @click="showForm = true">新增</v-btn>
                 </v-flex>
             </v-toolbar-items>
@@ -62,7 +62,7 @@
                 >
                     新建图表
                 </v-card-title>
-                <ChartForm v-on:chart_submit="showForm = false"></ChartForm>
+                <ChartForm v-on:chart_submit="showForm = false;getChartDetails"></ChartForm>
             </v-card>
         </v-dialog>
     </div>
@@ -126,6 +126,12 @@
                         });
                         console.log(this.chartDetails);
                     });
+            },
+            injectEndTime(time) {
+                if (time <= this.globalInterval.startTime) {
+                    return;
+                }
+                this.globalInterval.endTime = time
             }
         },
         mounted() {

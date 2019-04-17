@@ -31,7 +31,7 @@
                 >
                     mdi-clock-outline
                 </v-icon>
-                <span class="caption grey--text font-weight-light">updated 10 minutes ago</span>
+                <span class="caption grey--text font-weight-light">刷新于{{new Date(lastRefreshTime).toDateString()}}</span>
             </template>
         </material-card>
         <material-stats-card
@@ -94,6 +94,9 @@
                     '#82B1FF',
                     '#f55a4e',
                     '#495057',
+                    '#00d3ee',
+                    '#ffa21a',
+                    '#5cb860',
                 ],
                 dataZoom: [{type: 'slider'}],
                 chartData: {
@@ -183,7 +186,7 @@
                         startTime: this.queryTime.interval.startTime,
                         endTime: this.queryTime.interval.endTime,
                     }],
-                    period: this.chartDetail.type === 'stats' ? 'all' : this.queryTime.period,
+                    period: this.needTimeSlice ? this.queryTime.period : 'all',
                     filter: {},
                 };
 
@@ -194,7 +197,7 @@
                 columns.add('xAxis');
                 Chart.getViewByChart(1, params)
                     .then((resp) => {
-                        console.log(resp);
+                        console.log(`图表${this.chartDetail.name}`,resp);
                         this.metricList = resp.metricList;
                         this.calMetric();
                         // stats图表需要特殊处理

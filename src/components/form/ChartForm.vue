@@ -23,6 +23,16 @@
                 label="数据源"
                 item-text="name"
                 item-value="id"
+                v-if="this.params.type !== 'funnel'"
+        ></v-select>
+        <v-select
+                v-model="params.config.datasourceIds"
+                :items="datasources"
+                label="数据源（多选）"
+                item-text="name"
+                item-value="id"
+                multiple
+                v-else
         ></v-select>
 
 
@@ -30,7 +40,7 @@
         <v-container
                 v-for="(item,index) in params.aggregations"
                 :key="'agg'+index"
-
+                v-if="allowMetric"
         >
             <!--选择指标字段-->
             <v-layout>
@@ -93,7 +103,7 @@
         <v-container
                 v-for="(item,index) in params.dimensions"
                 :key="'dimen'+index"
-                v-if="params.type !== 'stats'"
+                v-if="allowDimension"
 
         >
             <!--选择指标字段-->
@@ -125,11 +135,24 @@
                         md3
                         lg3
                         xs12
+                        v-if="!singleDimension"
                 >
                     <v-btn flat color="success" v-if="params.dimensions.length === index + 1"
                            @click="putNewEmptyDimension">新增维度
                     </v-btn>
                     <v-btn flat color="error" @click="params.dimensions.splice(index, 1)">删除此项</v-btn>
+                </v-flex>
+                <v-flex
+                        md3
+                        lg3
+                        xs12
+                        v-else
+                >
+                    <v-text-field
+                            v-model="params.threshold"
+                            label="阈值"
+                            required
+                    ></v-text-field>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -196,6 +219,18 @@
                 }
                 return result;
             },
+            allowMetric() {
+                // 大部分允许指标，只有漏斗图不允许自定指标（默认为count）
+                return this.params.type !== 'funnel';
+            },
+            allowDimension() {
+                // 大部分允许维度，只有漏斗图和状态图不允许维度分组
+                return !['funnel', 'stats'].includes(this.params.type);
+            },
+            singleDimension() {
+                // 允许单维度，暂时只有饼图
+                return ['pie'].includes(this.params.type);
+            }
         },
         data() {
             return {
@@ -209,6 +244,7 @@
                     dimensions: [],
                     filters: [],
                     config: {},
+                    threshold:4,
                 },
                 types: [
                     {
@@ -219,10 +255,10 @@
                         text: '状态图',
                         value: 'stats',
                     },
-                    {
-                        text: '柱状图',
-                        value: 'histogram'
-                    },
+                    // {
+                    //     text: '柱状图',
+                    //     value: 'histogram'
+                    // },
                     {
                         text: '饼图',
                         value: 'pie'
@@ -280,12 +316,15 @@
                 this.params.aggregations = this.params.aggregations.filter(agg => agg.metric && agg.metric !== '');
                 this.params.dimensions = this.params.dimensions.filter(dimen => dimen.dimensionField && dimen.dimensionField !== '');
                 console.log(this.params);
+                if (this.params.type !== 'pie') {
+                    this.params.threshold = 200;
+                }
                 Chart.add(this.params)
                     .then(resp => {
                         console.log('提交成功');
                         this.$emit('chart_submit');
                         this.clear();
-                    })
+                    });
             },
             getDatasources() {
                 Datasource.list()
