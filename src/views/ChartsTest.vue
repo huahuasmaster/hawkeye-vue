@@ -3,16 +3,18 @@
         <ve-line :data="chartData" :colors="colors"></ve-line>
         <VariablePanel></VariablePanel>
         <MyDatetimePicker :label="'开始时间'" :default-date="new Date().valueOf()" v-on:pick_datetime="params => log(params)"></MyDatetimePicker>
-
+        <VariableTable :fields="items" ref="table"></VariableTable>
+        <v-btn block color="success" @click="getItems">提取数据</v-btn>
     </div>
 </template>
 
 <script>
     import VariablePanel from '../components/material/VariablePanel'
     import MyDatetimePicker from '../components/material/MyDatetimePicker';
+    import VariableTable from '../components/material/VariableTable'
 
     export default {
-        components: {VariablePanel, MyDatetimePicker},
+        components: {VariableTable, VariablePanel, MyDatetimePicker},
         data: function () {
             return {
                 colors: [
@@ -32,12 +34,26 @@
                         {'日期': '1/5', '访问用户': 3792, '下单用户': 3492, '下单率': 0.323},
                         {'日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78}
                     ]
-                }
+                },
+                items: [
+                    {
+                        name:'book_id',
+                        type:'dimension'
+                    },
+                    {
+                        name:'amount',
+                        type:'metric'
+                    }
+                ]
             }
         },
         methods: {
             log(item) {
                 console.log(item);
+            },
+            getItems() {
+                let items = this.$refs.table.items;
+                console.log(items);
             }
         }
     }
