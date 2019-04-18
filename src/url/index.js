@@ -40,4 +40,6 @@ export const Dashboard = {
 
 export const Datasource = {
     list: () => instance.get(`/hawkeye/api/datasources`),
+    listFields: (type, params) => instance.get(`/hawkeye/api/datasources/fields?type=${type}`, {params}),
+
 };

@@ -338,6 +338,9 @@
             newDatasource(type) {
                 this.showForm = true;
             }
+        },
+        computed: {
+
         }
     }
 </script>
