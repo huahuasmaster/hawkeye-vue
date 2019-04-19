@@ -49,6 +49,13 @@
                             v-if="params.type === 'MYSQL'"
                     ></v-text-field>
                     <v-text-field
+                            v-model="params.sourceInfo.host"
+                            label="数据库地址"
+                            placeholder="localhost:3307"
+                            required
+                            v-if="params.type === 'MYSQL'"
+                    ></v-text-field>
+                    <v-text-field
                             v-model="params.sourceInfo.user"
                             label="账号"
                             required
@@ -72,12 +79,12 @@
                             v-if="params.type === 'BURY'"
                     ></v-text-field>
 
-                    <v-text-field
+                    <v-textarea
                             v-model="params.sample"
                             label="数据样例"
                             required
                             v-if="params.type === 'BURY'"
-                    ></v-text-field>
+                    ></v-textarea>
 
 
                     <!--                <v-btn @click="submit" color="success">提交</v-btn>-->
@@ -85,15 +92,15 @@
                 </form>
             </v-tab-item>
             <v-tab-item key="2">
-<!--                <form style="padding: 24px">-->
-<!--                    <v-switch v-model="params.rollUp"></v-switch>-->
-<!--                </form>-->
-                <VariableTable :fields="params.fieldList" ref="table"></VariableTable>
+                <!--                <form style="padding: 24px">-->
+                <!--                    <v-switch v-model="params.rollUp"></v-switch>-->
+                <!--                </form>-->
+                <VariableTable :fields="mappedFields" ref="table"></VariableTable>
             </v-tab-item>
         </v-tabs>
 
         <div class="text-xs-center mt-3">
-            <v-btn @click="next" color="info">下一步</v-btn>
+            <v-btn @click="next" color="info" :loading="btnLoading">下一步</v-btn>
         </div>
     </div>
 </template>
@@ -105,6 +112,7 @@
         components: {VariableTable},
         data() {
             return {
+                btnLoading: false,
                 active: 0,
                 mysqlVO: {
                     database: '',
@@ -118,6 +126,7 @@
                     sample: '',
                     dimensionList: [],
                     metricList: [],
+                    rollUp: false,
                 },
                 types: [
                     {
@@ -130,6 +139,19 @@
                     }
                 ],
 
+            }
+        },
+        computed: {
+            mappedFields() {
+                if (!this.params.fieldList) {
+                    return [];
+                } else {
+                    return this.params.fieldList.map(field => {
+                        return {
+                            field, type: this.params.type === 'MYSQL' ? 'dimension' : null
+                        }
+                    });
+                }
             }
         },
         methods: {
@@ -146,44 +168,71 @@
                 this.active = 0;
             },
             getFields() {
+                let json = '';
+                try {
+                    if (this.params.type === 'BURY') {
+                        json = JSON.parse(this.params.sample);
+                    }
+                } catch (e) {
+                    this.$store.dispatch('alert', {type: "error", content: '请检查json格式是否正确'});
+                    this.btnLoading = false;
+                    return;
+                }
 
-                    Datasource.listFields(this.params.type, this.params.type === 'MYSQL' ?
-                    this.params.sourceInfo : this.sample)
-                        .then(resp => {
-                            this.params.fieldList = resp.map(field => {
-                                return {
-                                    field, type: 'dimension'
-                                }
-                            })
-                        });
+                console.log('json', json);
+                let params = {
+                    info: this.params.type === 'MYSQL' ?
+                        this.handlerMysqlInfo() : json,
+                    type: this.params.type,
+                };
 
+                Datasource.listFields(params)
+                    .then(resp => {
+                        this.params.fieldList = resp;
+                        this.btnLoading = false;
+                        this.active++;
+                    })
+                    .catch(exp => {
+                        this.btnLoading = false;
+                    });
+
+            },
+            handlerMysqlInfo() {
+                this.params.sourceInfo = {
+                    user: this.params.sourceInfo.user ? this.params.sourceInfo.user : "root",
+                    password: this.params.sourceInfo.password ? this.params.sourceInfo.password : "123456",
+                    host: this.params.sourceInfo.host ? this.params.sourceInfo.host : "localhost:3307",
+                    database: this.params.sourceInfo.database,
+                    table: this.params.sourceInfo.table,
+                };
+                return this.params.sourceInfo;
             },
             next() {
                 if (this.active === 0) {
+                    this.btnLoading = true;
                     // 进行字段列表解析
-                    this.fields = [
-                        {
-                            name: 'book_id',
-                            type: 'dimension'
-                        },
-                        {
-                            name: 'amount',
-                            type: 'metric'
-                        }
-                    ];
-                    this.active++;
+                    this.getFields();
                 } else {
                     // 提取用户的配置
-                    let fields = this.$refs.table.items;
+                    let fields = [];
+                    try {
+                        fields = this.$refs.table.items;
+                    } catch (e) {
+                        this.$store.dispatch('alert', {type: "error", content: '请检查json格式是否正确'});
+                        return;
+                    }
                     this.params.dimensionList = fields.filter(field => field.type === 'dimension')
-                        .map(field => field.name);
+                        .map(field => field.field);
                     this.params.metricList = fields.filter(field => field.type === 'metric')
-                        .map(field => field.name);
+                        .map(field => field.field);
                     // todo: 发送提交请求
-                    console.log(fields);
-                    // todo: 通知外界关闭弹窗
+                    console.log(this.params);
+                    Datasource.add(this.params)
+                        .then((resp) => {
+                            this.$emit('add_over');
+                            this.clear();
+                        })
 
-                    // 自己初始化
                 }
             }
         }

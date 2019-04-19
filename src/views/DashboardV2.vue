@@ -27,7 +27,7 @@
                                       style="margin-right: 16px"></MyDatetimePicker>
                     <span style="color:white" class="font-weight-light">结束：</span>
                     <MyDatetimePicker :default-date="globalInterval.endTime"
-                                      v-on:pick_datetime="time => injectEndTime"></MyDatetimePicker>
+                                      v-on:pick_datetime="time => injectEndTime(time)"></MyDatetimePicker>
                     <v-btn flat  color="success" @click="showForm = true">新增</v-btn>
                 </v-flex>
             </v-toolbar-items>

@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import store from '../store'
+
 export const instance = axios.create({
     // axios 实例配置，如没有其他配置项，可以置空
 });
@@ -12,19 +14,22 @@ instance.interceptors.response.use(
         if (resp.data.result === true) {
             return resp.data.data;
         } else {
-            // store.dispatch('alert', {type: "error", content: resp.data.errorMsg});
+            console.log("指明的错误");
+            store.dispatch('alert', {type: "error", content: resp.data.errorMsg});
         }
     },
     error => {
         console.log('error');
         console.log(error);
         console.log(JSON.stringify(error));// No message available
-        let message = JSON.parse(JSON.stringify(error)).response.status.message;
+        let status  = JSON.parse(JSON.stringify(error)).response.status;
+        let message = status.message;
+        // let code = status.
         let text = JSON.parse(JSON.stringify(error)).response.status === 404
             ? '访问的资源不存在'
-            : message === 'No message available' ? "网络出错，请重试" : message;
-        // store.dispatch('alert', {type: "error", content: text});
-        return Promise.reject(error)
+            : message && message === 'No message available' ? "网络出错，请重试" : '服务器开小差了';
+        store.dispatch('alert', {type: "error", content: text});
+        return Promise.reject(error);
 
     }
 );
@@ -40,6 +45,7 @@ export const Dashboard = {
 
 export const Datasource = {
     list: () => instance.get(`/hawkeye/api/datasources`),
-    listFields: (type, params) => instance.get(`/hawkeye/api/datasources/fields?type=${type}`, {params}),
+    listFields: (params) => instance.get(`/hawkeye/api/datasources/fields`, {params}),
+    add: (params) => instance.post('/hawkeye/api/datasources/', params, {}),
 
 };

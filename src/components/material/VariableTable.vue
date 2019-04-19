@@ -3,6 +3,7 @@
             :headers="headers"
             :items="items"
             hide-actions
+            style="margin-right: 16px;margin-left: 16px"
     >
         <template
                 slot="headerCell"
@@ -16,7 +17,7 @@
                 slot="items"
                 slot-scope="{ index, item }"
         >
-            <td>{{ item.name }}</td>
+            <td>{{ item.field }}</td>
             <td>
                 <v-select
                         v-model="item.type"
@@ -34,7 +35,7 @@
         props: ['fields'],
         watch: {
             fields(to, from) {
-                console.log('监听到参数变更');
+                // console.log('监听到参数变更');
                 this.items = to;
             },
         },
@@ -44,7 +45,7 @@
                     {
                         sortable: false,
                         text: '字段名',
-                        value: 'name',
+                        value: 'field',
                         align: 'left'
                     },
                     {

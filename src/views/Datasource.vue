@@ -28,8 +28,9 @@
 
             </template>
             <v-data-table
+                    key="1"
                     :headers="headers"
-                    :items="items"
+                    :items="mysqlItems"
                     hide-actions
             >
                 <template
@@ -46,7 +47,7 @@
                 >
                     <td>{{ item.id}}</td>
                     <td>{{ item.name }}</td>
-                    <td>{{ JSON.stringify(item.config) }}</td>
+                    <td>{{ JSON.stringify(item.sourceInfo) }}</td>
                     <td>{{ item.queryGranularity }}</td>
 
                     <td>
@@ -106,6 +107,7 @@
 
             </template>
             <v-data-table
+                    key="2"
                     :headers="buryHeaders"
                     :items="buryItems"
                     hide-actions
@@ -125,7 +127,7 @@
                     <td>{{ item.id}}</td>
                     <td>{{ item.name }}</td>
                     <td>{{ item.desc }}</td>
-                    <td>{{ JSON.stringify(item.config) }}</td>
+                    <td>{{ JSON.stringify(item.sourceInfo) }}</td>
                     <td>{{ item.queryGranularity }}</td>
 
                     <td>
@@ -152,93 +154,30 @@
         </material-card>
         <v-dialog v-model="showForm" width="500">
             <v-card>
-                <DatasourceForm></DatasourceForm>
+                <DatasourceForm v-on:add_over="afterAddOver"></DatasourceForm>
             </v-card>
         </v-dialog>
     </div>
 </template>
 <script>
     import DatasourceForm from '../components/form/DatasourceForm'
+    import {Datasource} from "../url";
+
     export default {
         components: {DatasourceForm},
+        computed: {
+            mysqlItems() {
+                return this.items.filter(item => item.type === 'MYSQL')
+            },
+            buryItems() {
+                return this.items.filter(item => item.type === 'BURY')
+            },
+        },
         data() {
             return {
-                items: [
-                    {
-                        id: 1,
-                        name: 'duangduang.t_order',
-                        config: {
-                            database: 'duangduang',
-                            table: 't_order',
-                        },
-                        queryGranularity: '1天',
-                        enable: true,
-                    },
-                    {
-                        id: 1,
-                        name: 'duangduang.t_order',
-                        config: {
-                            database: 'duangduang',
-                            table: 't_order',
-                        },
-                        queryGranularity: '1小时',
 
-                        enable: true,
-                    }, {
-                        id: 1,
-                        name: 'duangduang.t_order',
-                        config: {
-                            database: 'duangduang',
-                            table: 't_order',
-                        },
-                        queryGranularity: '1分钟',
+                items: [],
 
-                        enable: false,
-                    }, {
-                        id: 1,
-                        name: 'duangduang.t_order',
-                        config: {
-                            database: 'duangduang',
-                            table: 't_order',
-                        },
-                        queryGranularity: '1秒',
-
-                        enable: true,
-                    },
-                ],
-                buryItems: [
-                    {
-                        id: 6,
-                        name: 'duangduang.login',
-                        config: {
-                            event: 'login',
-                        },
-                        desc: 'duangduang登录事件',
-                        queryGranularity: '1小时',
-                        enable: false,
-                    },
-                    {
-                        id: 7,
-                        name: 'duangduang.place_order',
-                        config: {
-                            event: 'place_order',
-                        },
-                        queryGranularity: '1天',
-
-                        desc: 'duangduang下单事件',
-                        enable: true,
-                    }, {
-                        id: 8,
-                        name: 'duangduang.pay_order',
-                        config: {
-                            event: 'pay_order',
-                        },
-                        queryGranularity: '1分钟',
-
-                        desc: 'duangduang支付订单',
-                        enable: true,
-                    },
-                ],
                 headers: [
                     {
                         sortable: false,
@@ -337,10 +276,20 @@
             },
             newDatasource(type) {
                 this.showForm = true;
+            },
+            getItems() {
+                Datasource.list()
+                    .then(resp => {
+                        this.items = resp;
+                    });
+            },
+            afterAddOver() {
+                this.showForm = false;
+                this.getItems();
             }
         },
-        computed: {
-
+        mounted() {
+            this.getItems();
         }
     }
 </script>
