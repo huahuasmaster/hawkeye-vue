@@ -224,7 +224,9 @@
                         // });
                         // this.chartData.columns = Array.from(columns);
                         // console.log(this.chartData);
-                    });
+                    }).catch(exp => {
+                        this.$store.dispatch('alert',{type:'info', content:`图表${this.chartDetail.name}数据获取失败`})
+                });
 
                 // console.log('results');
                 // console.log(this.metricList);

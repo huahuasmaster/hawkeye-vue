@@ -319,6 +319,11 @@
                 if (this.params.type !== 'pie') {
                     this.params.threshold = 200;
                 }
+                if (this.params.type === 'funnel') {
+                    this.params.aggregations = [{
+
+                    }]
+                }
                 Chart.add(this.params)
                     .then(resp => {
                         console.log('提交成功');

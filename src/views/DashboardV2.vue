@@ -28,7 +28,8 @@
                     <span style="color:white" class="font-weight-light">结束：</span>
                     <MyDatetimePicker :default-date="globalInterval.endTime"
                                       v-on:pick_datetime="time => injectEndTime(time)"></MyDatetimePicker>
-                    <v-btn flat  color="success" @click="showForm = true">新增</v-btn>
+                    <v-btn flat color="success" @click="refresh">刷新</v-btn>
+                    <v-btn flat color="success" @click="showForm = true">新增</v-btn>
                 </v-flex>
             </v-toolbar-items>
         </v-toolbar>
@@ -41,7 +42,7 @@
                 <v-flex
                         md12
                         sm12
-                        lg6
+                        lg4
                         v-for="item in chartDetails"
                 >
                     <VChartBaseCard
@@ -62,7 +63,7 @@
                 >
                     新建图表
                 </v-card-title>
-                <ChartForm v-on:chart_submit="showForm = false;getChartDetails"></ChartForm>
+                <ChartForm v-on:chart_submit="afterAddOver"></ChartForm>
             </v-card>
         </v-dialog>
     </div>
@@ -82,7 +83,7 @@
             return {
                 showForm: false,
                 globalInterval: {
-                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 5,
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 *2,
                     endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
                 },
 
@@ -118,12 +119,7 @@
                 Dashboard.listChartsByDashboardId(1)
                     .then((resp) => {
                         console.log('获取到图表配置');
-                        this.chartDetails = resp.map((chart) => {
-                            // if(chart.config) {
-                            //     chart.config = JSON.parse(chart.config);
-                            // }
-                            return chart;
-                        });
+                        this.chartDetails = resp;
                         console.log(this.chartDetails);
                     });
             },
@@ -132,7 +128,18 @@
                     return;
                 }
                 this.globalInterval.endTime = time
-            }
+            },
+            refresh() {
+                this.globalInterval = {
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 *2,
+                        endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
+                };
+                this.$store.dispatch('alert',{content:'刷新数据中，请稍后'})
+            },
+            afterAddOver() {
+                this.showForm = false;
+                this.getChartDetails();
+            },
         },
         mounted() {
             this.getChartDetails();
