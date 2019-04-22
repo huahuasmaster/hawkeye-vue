@@ -20,7 +20,8 @@
                     v-if="chartDetail.type === 'pie'"></ve-pie>
 
             <!--漏斗图，只有一个维度和一个指标（数量）-->
-            <ve-funnel :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="chartSetting"
+            <ve-funnel :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="{useDefaultOrder: true,
+                    filterZero: true}"
                        v-if="chartDetail.type === 'funnel'"></ve-funnel>
             </div>
             <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
@@ -120,7 +121,8 @@
                     {v: one_week, t: '一周前'}],
                 lastRefreshTime: new Date().valueOf(),
                 chartSetting: {
-                    coordinateSystem: 'geo'
+                    coordinateSystem: 'geo',
+
                 },
                 first: true,
             }
@@ -308,7 +310,8 @@
                         entry.forEach(map => {
                             let key = map[0], value = map[1];
                             if (this.metrics.includes(key)) {
-                                row[key] = value;
+                                // 漏斗图的指标需要转化一下
+                                row[key] = this.chartDetail.type === 'funnel' && key === '数量' ? parseInt(value) : value;
                                 columns.add(key);
                             }
                             if (this.dimensions.includes(key)) xAxisValue = this.dimensions.length === 1 ? value : xAxisValue + key + ':' + value + '.';

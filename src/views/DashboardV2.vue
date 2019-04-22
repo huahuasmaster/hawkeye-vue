@@ -10,7 +10,7 @@
                 <v-toolbar-title
                         class="tertiary--text font-weight-light"
                 >
-                    Duangduang下单看板
+                    {{dashboardVO.name}}
                 </v-toolbar-title>
             </div>
 
@@ -34,37 +34,38 @@
             </v-toolbar-items>
         </v-toolbar>
         <!--<v-container-->
-                <!--fill-height-->
-                <!--fluid-->
-                <!--grid-list-xl-->
+        <!--fill-height-->
+        <!--fluid-->
+        <!--grid-list-xl-->
         <!--&gt;-->
-            <!--<v-layout wrap>-->
-                <!--<v-flex-->
-                        <!--md12-->
-                        <!--sm12-->
-                        <!--lg4-->
-                        <!--v-for="item in chartDetails"-->
-                <!--&gt;-->
-                    <!--<VChartBaseCard-->
+        <!--<v-layout wrap>-->
+        <!--<v-flex-->
+        <!--md12-->
+        <!--sm12-->
+        <!--lg4-->
+        <!--v-for="item in chartDetails"-->
+        <!--&gt;-->
+        <!--<VChartBaseCard-->
 
-                            <!--color="white"-->
-                            <!--:chart-detail="item"-->
-                            <!--:query-interval="globalInterval"-->
-                    <!--&gt;-->
-                    <!--</VChartBaseCard>-->
-                <!--</v-flex>-->
-            <!--</v-layout>-->
+        <!--color="white"-->
+        <!--:chart-detail="item"-->
+        <!--:query-interval="globalInterval"-->
+        <!--&gt;-->
+        <!--</VChartBaseCard>-->
+        <!--</v-flex>-->
+        <!--</v-layout>-->
         <!--</v-container>-->
         <grid-layout :layout.sync="layout" :col-num="12" :row-height="75" :is-draggable="true" :is-resizable="true"
                      :is-mirrored="false"
                      :vertical-compact="true" :margin="[15, 15]" :use-css-transforms="false"
                      @layout-updated="layoutUpdatedEvent">
-            <grid-item v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" :ref="`grid-${item.i}`"
+            <grid-item v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
+                       :ref="`grid-${item.i}`"
                        :max-h="dashboardVO.chartList.find(c => c.id === parseInt(item.i)).type === 'stats' ? 2 : 10"
                        drag-ignore-from=".mycontent" @resized="resizeEvent" :minH="1">
                 <VChartBaseCard :ref="`chart-${item.i}`" @delete-chart="deleteChart"
-                           :chartDetail="dashboardVO.chartList.find(c => c.id === parseInt(item.i))"
-                           :queryInterval="globalInterval" color="white"/>
+                                :chartDetail="dashboardVO.chartList.find(c => c.id === parseInt(item.i))"
+                                :queryInterval="globalInterval" color="white"/>
             </grid-item>
         </grid-layout>
         <v-dialog v-model="showForm" width="1000">
@@ -75,7 +76,7 @@
                 >
                     新建图表
                 </v-card-title>
-                <ChartForm v-on:chart_submit="afterAddOver"></ChartForm>
+                <ChartForm v-on:chart_submit="afterAddChart" :dashboardId="this.dashboardId"></ChartForm>
             </v-card>
         </v-dialog>
     </div>
@@ -97,9 +98,10 @@
             return {
                 showForm: false,
                 globalInterval: {
-                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 *2,
-                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 2,
+                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 30,
                 },
+                hasDefinedEndTime: false,
                 dashboardVO: {},
 
                 // chartDetails: [{
@@ -130,7 +132,7 @@
                 theme: JSON.parse(VChartsTheme.themeJSON),
                 themeName: VChartsTheme.themeName,
                 dashboardId: 1,
-                heights:[],
+                heights: [],
             }
         },
         methods: {
@@ -155,51 +157,81 @@
                 if (time <= this.globalInterval.startTime) {
                     return;
                 }
-                this.globalInterval.endTime = time
+                this.globalInterval.endTime = time;
+                this.hasDefinedEndTime = true;
             },
             refresh() {
+                this.hasDefinedEndTime = false;
                 this.globalInterval = {
-                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 *2,
-                        endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 60,
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 2,
+                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 30,
                 };
-                this.$store.dispatch('alert',{content:'刷新数据中，请稍后'})
+                this.$store.dispatch('alert', {content: '刷新数据中，请稍后'})
             },
-            afterAddOver() {
-                this.showForm = false;
-                this.getChartDetails();
-            },
+
             deleteChart(id) {
-                console.log('想要删除图表'+id);
+                console.log('想要删除图表' + id);
             },
-            resizeEvent: function(i, newH, newW, newHPx, newWPx) {
+            resizeEvent: function (i, newH, newW, newHPx, newWPx) {
                 console.log('RESIZE i=' + i + ', H=' + newH + ', W=' + newW + ', H(px)=' + newHPx + ', W(px)=' + newWPx);
                 let ref = this.$refs[`chart-${i}`];
-                console.log(ref[0]);
+                // console.log(ref[0]);
                 ref[0].viewReSize(newHPx, newWPx);
             },
             layoutUpdatedEvent(newLayout) {
-                console.log(JSON.stringify(newLayout));
+                // console.log(JSON.stringify(newLayout));
+                let layout = JSON.parse(JSON.stringify(newLayout));
+                Dashboard.updateLayout(this.dashboardId, layout)
+                    .then(resp => console.log("看板配置更新成功")
+                    );
             },
-            afterGridReady(newLayout) {
-                // console.log('开始获取grid高度');
-
-
-                // this.dashboardVO.chartList
-                //     .forEach(chart => {
-                //         let height = this.$refs[`grid-${chart.i}`];
-                //         console.log(`id = ${chart.id}`);
-                //         console.log(height);
-                //     });
-
-                // this.$refs[`chart-${i}`]
-            }
+            afterAddChart(chartId) {
+                this.showForm = false;
+                let chart = this.layout.find(item => parseInt(item.i) === chartId);
+                if (chart) {
+                    // console.log('修改图表完成', chartId);
+                    // this.getDashboardInfo();
+                    // this.showForm = false;
+                    // this.getDashboardInfo();
+                    // this.$refs[chartId][0].refresh();
+                } else {
+                    let maxY = 0, newLayout = [];
+                    if (this.layout.length > 0) {
+                        maxY = this.layout.reduce((item1, item2) => item1.y > item2.y ? item1 : item2).y;
+                    }
+                    Object.assign(newLayout, this.layout);
+                    newLayout.push({
+                        'x': 0,
+                        'y': maxY + 6,
+                        'w': 6,
+                        'h': 6,
+                        'i': chartId.toString(),
+                    });
+                    // this.dashboardInfo.config = {
+                    //     layout: newLayout,
+                    // };
+                    Dashboard.updateLayout(this.dashboardId, newLayout)
+                        .then(resp => {
+                            console.log("看板配置更新成功");
+                            this.getChartDetails();
+                            this.refresh();
+                        })
+                    // Dashboard.update(this.dashboardInfo).then(resp => {
+                    //     console.log('添加图表完成', chartId);
+                    //     Dashboard.get(this.boardId).then((resp) => {
+                    //         this.dashboardInfo = resp.data;
+                    //         this.refresh();
+                    //         this.showForm = false;
+                    //     });
+                    // });
+                }
+            },
 
         },
         mounted() {
             this.dashboardId = this.$route.params.id;
             console.log(`当前看板的id为${this.dashboardId}`);
             this.getChartDetails();
-
         }
     }
 </script>

@@ -195,6 +195,7 @@
     import {Datasource, Chart} from "../../url";
 
     export default {
+        props: ['dashboardId'],
         watch: {
             "params.datasourceId": {
                 handler(to, from) {
@@ -270,6 +271,7 @@
                 ],
                 datasources: [],
                 choosedDimensions: [],
+                newChartId: -1,
             }
         },
         methods: {
@@ -315,6 +317,7 @@
             submit() {
                 this.params.aggregations = this.params.aggregations.filter(agg => agg.metric && agg.metric !== '');
                 this.params.dimensions = this.params.dimensions.filter(dimen => dimen.dimensionField && dimen.dimensionField !== '');
+                this.params.dashboardId = this.dashboardId;
                 console.log(this.params);
                 if (this.params.type !== 'pie') {
                     this.params.threshold = 200;
@@ -326,8 +329,9 @@
                 }
                 Chart.add(this.params)
                     .then(resp => {
-                        console.log('提交成功');
-                        this.$emit('chart_submit');
+                        this.newChartId = resp;
+                        console.log('提交成功,图表id='+this.newChartId);
+                        this.$emit('chart_submit', this.newChartId);
                         this.clear();
                     });
             },
