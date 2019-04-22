@@ -48,7 +48,7 @@ export default [
     view: 'MetricVariable'
   },
   {
-    path: '/dashboardv2',
+    path: '/dashboardv2/:id',
     view: 'DashboardV2'
   }
 ]

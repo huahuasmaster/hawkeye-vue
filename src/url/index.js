@@ -41,6 +41,7 @@ export const Chart = {
 
 export const Dashboard = {
     listChartsByDashboardId: (dashboardId) => instance.get(`/hawkeye/api/dashboards/${dashboardId}/charts`),
+    get: dashboardId => instance.get(`/hawkeye/api/dashboards/${dashboardId}`)
 };
 
 export const Datasource = {

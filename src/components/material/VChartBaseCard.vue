@@ -5,37 +5,39 @@
                 v-bind="$attrs"
                 class="v-card--material-chart"
                 v-on="$listeners"
+                ref="chart-content"
         >
+            <div class="mycontent">
             <!--        折线图-->
-            <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
+            <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow" ref="chart" judge-width
                      v-if="chartDetail.type === 'line'" height="360px"></ve-line>
             <!--        柱状图-->
-            <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom"
+            <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" ref="chart" judge-width :xAxis="xAxis"
                           v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>
 
             <!--        饼图，只有一个维度和一个指标（数量）-->
-            <ve-pie :data="chartData" :colors="colors" slot="header"
+            <ve-pie :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="chartSetting"
                     v-if="chartDetail.type === 'pie'"></ve-pie>
 
             <!--漏斗图，只有一个维度和一个指标（数量）-->
-            <ve-funnel :data="chartData" :colors="colors" slot="header"
+            <ve-funnel :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="chartSetting"
                        v-if="chartDetail.type === 'funnel'"></ve-funnel>
+            </div>
+            <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
+            <p class="category d-inline-flex font-weight-light" ref="chart-desc">{{chartDetail.desc}}</p>
 
-            <h4 class="title font-weight-light">{{chartDetail.name}}</h4>
-            <p class="category d-inline-flex font-weight-light">{{chartDetail.desc}}</p>
-
-            <template slot="actions">
+            <div slot="actions" ref="chart-action">
                 <v-icon
                         class="mr-2"
                         small
                 >
                     mdi-clock-outline
                 </v-icon>
-                <span class="caption grey--text font-weight-light">刷新于{{new Date(lastRefreshTime).toDateString()}}</span>
-            </template>
+                <span class="caption grey--text font-weight-light">刷新于{{new Date(lastRefreshTime).toISOString()}}</span>
+            </div>
         </material-card>
         <material-stats-card
-                v-if="chartDetail.type === 'stats'"
+                v-if="chartDetail.type === 'stats'" ref="chart-stats"
                 color="green"
                 icon="mdi-store"
                 :title="chartDetail.name"
@@ -61,12 +63,17 @@
     const period_option = [
         {min: -1, max: thirty_minutes, options: ['1分钟', '2分钟', '5分钟']},
         {min: thirty_minutes, max: one_hour, options: ['2分钟', '5分钟', '10分钟']},
-        {min: one_hour, max: six_hour, options: ['5分钟', '10分钟', '15分钟']},
-        {min: six_hour, max: twelve_hour, options: ['10分钟', '15分钟', '20分钟']},
+        {min: one_hour, max: six_hour, options: ['10分钟', '15分钟', '20分钟']},
+        {min: six_hour, max: twelve_hour, options: ['15分钟', '20分钟', '30分钟']},
         {min: twelve_hour, max: one_day, options: ['15分钟', '20分钟', '30分钟']},
         {min: one_day, max: three_day, options: ['2小时', '6小时', '12小时']},
         {min: three_day, max: one_week, options: ['6小时', '12小时', '1天']},
         {min: one_week, max: three_month, options: ['1天']},
+    ];
+    const extraHeights = [
+        {type: 'line', height: 100},
+        {type: 'pie', height: 115},
+        {type: 'funnel', height: 95},
     ];
     export default {
         inheritAttrs: false,
@@ -112,6 +119,10 @@
                     {v: one_day, t: '一天前'},
                     {v: one_week, t: '一周前'}],
                 lastRefreshTime: new Date().valueOf(),
+                chartSetting: {
+                    coordinateSystem: 'geo'
+                },
+                first: true,
             }
         },
 
@@ -170,6 +181,7 @@
                     return columns;
                 }
             },
+
 
         },
 
@@ -323,6 +335,7 @@
                 console.log('图表渲染数据', this.chartData);
                 this.xAxis.data = this.dataAxis;
                 this.lastRefreshTime = new Date().getTime();
+                this.viewReSize(this.$parent.$el.clientHeight);
             },
             clear() {
                 if (this.chartDetail.type === 'stats') {
@@ -333,6 +346,29 @@
                 }
                 this.metricList = [];
             },
+            viewReSize: function(newHPx, newWPx) {
+                // 需要计算出图表的实际新高度
+                if (!this.chartDetail || this.chartDetail.type === 'stats') {
+                    return;
+                }
+                console.log(this.$refs);
+                let nameHeight = this.$refs['chart-name'].clientHeight;
+                let descHeight = this.$refs['chart-desc'].clientHeight;
+                let actionHeight = this.$refs['chart-action'].clientHeight;
+                let extraHeight = extraHeights.find(e => e.type === this.chartDetail.type).height;
+                let chartHeight = newHPx - nameHeight - descHeight - actionHeight - extraHeight;
+                this.$nextTick(_ => {
+                    let chart = this.$refs[`chart`];
+                    if (chart) {
+                        chart.height = chartHeight + 'px';
+                        chart.echarts.resize();
+                    }
+                });
+                // this.$nextTick(_ => {
+                //     let table = this.$refs[`table`];
+                //     if (table) table.height = chartHeight;
+                // });
+            },
         },
 
         mounted() {
@@ -341,6 +377,9 @@
             this.queryTime.period = this.granularityOptions[0];
             this.chartId = this.chartDetail.id;
             this.getMetric();
+            // console.log(this.$parent.$el);
+            let parentheight = this.$parent.$el.clientHeight;
+            // console.log('parentheight', parentheight);
         }
 
     }
@@ -372,5 +411,8 @@
                 fill: rgba(255, 255, 255, .4);
             }
         }
+    }
+    .mycontent{
+
     }
 </style>
