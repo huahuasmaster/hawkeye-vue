@@ -24,18 +24,65 @@
                     filterZero: true}"
                        v-if="chartDetail.type === 'funnel'"></ve-funnel>
             </div>
-            <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
-            <p class="category d-inline-flex font-weight-light" ref="chart-desc">{{chartDetail.desc}}</p>
 
-            <div slot="actions" ref="chart-action">
-                <v-icon
-                        class="mr-2"
-                        small
-                >
-                    mdi-clock-outline
-                </v-icon>
-                <span class="caption grey--text font-weight-light">刷新于{{new Date(lastRefreshTime).toISOString()}}</span>
-            </div>
+
+            <v-container style="padding: 0px"  align-center justify-center row fill-height>
+                <v-layout>
+                    <v-flex>
+                        <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
+                        <p class="category d-inline-flex font-weight-light" ref="chart-desc">{{chartDetail.desc}}</p>
+                    </v-flex>
+                    <v-spacer></v-spacer>
+                    <v-flex
+                            lg4
+                            md4
+                            v-if="this.chartDetail.type === 'line'"
+                    >
+                        <v-select
+                                v-model="compareText"
+                                :items="compareTime"
+                                label="选择同比"
+                                item-text="t"
+                                item-valie="v"
+                        >
+
+                        </v-select>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+
+            <!--<div slot="actions" ref="chart-action">-->
+                <!--<v-container style="padding: 0px"  align-center justify-center row fill-height>-->
+                    <!--<v-layout>-->
+                        <!--<v-flex>-->
+                            <!--<v-icon-->
+                                    <!--class="mr-2"-->
+                                    <!--small-->
+                            <!--&gt;-->
+                                <!--mdi-clock-outline-->
+                            <!--</v-icon>-->
+                            <!--<span class="caption grey&#45;&#45;text font-weight-light">刷新于{{new Date(lastRefreshTime).toLocaleTimeString()}}</span>-->
+                        <!--</v-flex>-->
+                        <!--<v-spacer></v-spacer>-->
+                        <!--<v-flex-->
+                            <!--lg4-->
+                            <!--md4-->
+                        <!--&gt;-->
+                            <!--<v-select-->
+                                    <!--v-model="compareText"-->
+                                    <!--:items="compareTime"-->
+                                    <!--label="选择同比"-->
+                                    <!--item-text="t"-->
+                                    <!--item-valie="v"-->
+                            <!--&gt;-->
+
+                            <!--</v-select>-->
+                        <!--</v-flex>-->
+                    <!--</v-layout>-->
+                <!--</v-container>-->
+
+
+            <!--</div>-->
         </material-card>
         <material-stats-card
                 v-if="chartDetail.type === 'stats'" ref="chart-stats"
@@ -72,7 +119,7 @@
         {min: one_week, max: three_month, options: ['1天']},
     ];
     const extraHeights = [
-        {type: 'line', height: 100},
+        {type: 'line', height: 80},
         {type: 'pie', height: 115},
         {type: 'funnel', height: 95},
     ];
@@ -115,6 +162,7 @@
                 queryTime: {interval: {startTime: 0, endTime: 0}, period: ''},
                 xAxis: {axisLabel: {interval: 0}},
                 compareMetricText: null,
+                compareText: null,
                 compareTime: [
                     {v: one_hour, t: '一小时前'},
                     {v: one_day, t: '一天前'},
@@ -183,7 +231,10 @@
                     return columns;
                 }
             },
-
+            compareTime: [
+                {v: one_hour, t: '一小时前'},
+                {v: one_day, t: '一天前'},
+                {v: one_week, t: '一周前'}],
 
         },
 
@@ -350,6 +401,7 @@
                 this.metricList = [];
             },
             viewReSize: function(newHPx, newWPx) {
+                console.log(`${this.chartDetail.name}开始更新大小`);
                 // 需要计算出图表的实际新高度
                 if (!this.chartDetail || this.chartDetail.type === 'stats') {
                     return;
@@ -357,9 +409,9 @@
                 console.log(this.$refs);
                 let nameHeight = this.$refs['chart-name'].clientHeight;
                 let descHeight = this.$refs['chart-desc'].clientHeight;
-                let actionHeight = this.$refs['chart-action'].clientHeight;
+                // let actionHeight = this.$refs['chart-action'].clientHeight;
                 let extraHeight = extraHeights.find(e => e.type === this.chartDetail.type).height;
-                let chartHeight = newHPx - nameHeight - descHeight - actionHeight - extraHeight;
+                let chartHeight = newHPx - nameHeight - descHeight - extraHeight;
                 this.$nextTick(_ => {
                     let chart = this.$refs[`chart`];
                     if (chart) {

@@ -98,8 +98,8 @@
             return {
                 showForm: false,
                 globalInterval: {
-                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 2,
-                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 30,
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60,
+                    endTime: moment().startOf('hour').valueOf(),
                 },
                 hasDefinedEndTime: false,
                 dashboardVO: {},
@@ -163,8 +163,8 @@
             refresh() {
                 this.hasDefinedEndTime = false;
                 this.globalInterval = {
-                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60 * 2,
-                    endTime: moment().startOf('hour').valueOf() + 1000 * 60 * 30,
+                    startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60,
+                    endTime: moment().startOf('hour').valueOf(),
                 };
                 this.$store.dispatch('alert', {content: '刷新数据中，请稍后'})
             },
