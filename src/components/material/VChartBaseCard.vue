@@ -8,25 +8,27 @@
                 ref="chart-content"
         >
             <div class="mycontent">
-            <!--        折线图-->
-            <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow" ref="chart" judge-width
-                     v-if="chartDetail.type === 'line'" height="360px"></ve-line>
-            <!--        柱状图-->
-            <ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" ref="chart" judge-width :xAxis="xAxis"
-                          v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>
+                <!--        折线图-->
+                <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
+                         ref="chart" judge-width
+                         v-if="chartDetail.type === 'line'" ></ve-line>
+                <!--        柱状图-->
+                <!--<ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" ref="chart" judge-width :xAxis="xAxis"-->
+                <!--v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>-->
 
-            <!--        饼图，只有一个维度和一个指标（数量）-->
-            <ve-pie :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="chartSetting"
-                    v-if="chartDetail.type === 'pie'"></ve-pie>
+                <!--        饼图，只有一个维度和一个指标（数量）-->
+                <ve-pie :data="chartData" :colors="colors" slot="header" ref="chart" judge-width
+                        :chartSetting="chartSetting"
+                        v-if="chartDetail.type === 'pie'"></ve-pie>
 
-            <!--漏斗图，只有一个维度和一个指标（数量）-->
-            <ve-funnel :data="chartData" :colors="colors" slot="header" ref="chart" judge-width  :chartSetting="{useDefaultOrder: true,
+                <!--漏斗图，只有一个维度和一个指标（数量）-->
+                <ve-funnel :data="chartData" :colors="colors" slot="header" ref="chart" judge-width :chartSetting="{useDefaultOrder: true,
                     filterZero: true}"
-                       v-if="chartDetail.type === 'funnel'"></ve-funnel>
+                           v-if="chartDetail.type === 'funnel'"></ve-funnel>
             </div>
 
 
-            <v-container style="padding: 0px"  align-center justify-center row fill-height>
+            <v-container style="padding: 0px" align-center justify-center row fill-height ref="chart-detail">
                 <v-layout>
                     <v-flex>
                         <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
@@ -43,7 +45,7 @@
                                 :items="compareTime"
                                 label="选择同比"
                                 item-text="t"
-                                item-valie="v"
+                                item-value="v"
                         >
 
                         </v-select>
@@ -52,34 +54,34 @@
             </v-container>
 
             <!--<div slot="actions" ref="chart-action">-->
-                <!--<v-container style="padding: 0px"  align-center justify-center row fill-height>-->
-                    <!--<v-layout>-->
-                        <!--<v-flex>-->
-                            <!--<v-icon-->
-                                    <!--class="mr-2"-->
-                                    <!--small-->
-                            <!--&gt;-->
-                                <!--mdi-clock-outline-->
-                            <!--</v-icon>-->
-                            <!--<span class="caption grey&#45;&#45;text font-weight-light">刷新于{{new Date(lastRefreshTime).toLocaleTimeString()}}</span>-->
-                        <!--</v-flex>-->
-                        <!--<v-spacer></v-spacer>-->
-                        <!--<v-flex-->
-                            <!--lg4-->
-                            <!--md4-->
-                        <!--&gt;-->
-                            <!--<v-select-->
-                                    <!--v-model="compareText"-->
-                                    <!--:items="compareTime"-->
-                                    <!--label="选择同比"-->
-                                    <!--item-text="t"-->
-                                    <!--item-valie="v"-->
-                            <!--&gt;-->
+            <!--<v-container style="padding: 0px"  align-center justify-center row fill-height>-->
+            <!--<v-layout>-->
+            <!--<v-flex>-->
+            <!--<v-icon-->
+            <!--class="mr-2"-->
+            <!--small-->
+            <!--&gt;-->
+            <!--mdi-clock-outline-->
+            <!--</v-icon>-->
+            <!--<span class="caption grey&#45;&#45;text font-weight-light">刷新于{{new Date(lastRefreshTime).toLocaleTimeString()}}</span>-->
+            <!--</v-flex>-->
+            <!--<v-spacer></v-spacer>-->
+            <!--<v-flex-->
+            <!--lg4-->
+            <!--md4-->
+            <!--&gt;-->
+            <!--<v-select-->
+            <!--v-model="compareText"-->
+            <!--:items="compareTime"-->
+            <!--label="选择同比"-->
+            <!--item-text="t"-->
+            <!--item-valie="v"-->
+            <!--&gt;-->
 
-                            <!--</v-select>-->
-                        <!--</v-flex>-->
-                    <!--</v-layout>-->
-                <!--</v-container>-->
+            <!--</v-select>-->
+            <!--</v-flex>-->
+            <!--</v-layout>-->
+            <!--</v-container>-->
 
 
             <!--</div>-->
@@ -97,6 +99,10 @@
 
 <script>
     import {Chart} from "../../url";
+    import VeLine from 'v-charts/lib/line.common'
+    import VePie from 'v-charts/lib/pie.common'
+    import VeFunnel from 'v-charts/lib/funnel.common'
+    import 'echarts/lib/component/dataZoom'
 
     let moment = require('moment')
     const thirty_minutes = 1000 * 60 * 30;
@@ -119,14 +125,20 @@
         {min: one_week, max: three_month, options: ['1天']},
     ];
     const extraHeights = [
-        {type: 'line', height: 80},
-        {type: 'pie', height: 115},
-        {type: 'funnel', height: 95},
+        {type: 'line', height: 60},
+        {type: 'pie', height: 70},
+        {type: 'funnel', height: 70},
     ];
     export default {
         inheritAttrs: false,
 
         props: ['chartDetail', 'queryInterval', 'showStyle', 'extraFilters'],
+
+        components: {
+            VeLine,
+            VePie,
+            VeFunnel,
+        },
 
         watch: {
             queryInterval: {
@@ -139,6 +151,9 @@
                     this.getMetric();
                 },
                 deep: true
+            },
+            compareText(to, from) {
+                this.getMetric();
             }
         },
 
@@ -173,15 +188,21 @@
 
                 },
                 first: true,
+                targetHeight: '0px'
             }
         },
 
         computed: {
+            compareMetric: function () {
+                return this.compareTime.find(c => c.v === this.compareText);
+            },
             readyToShow() {
                 return this.chartData && this.chartData.columns && this.chartData.columns.length >= 1
             },
             wholeStats() {
-                return this.chartDetail.config.prefix + this.chartData + this.chartDetail.config.suffix;
+                let prefix = this.chartDetail.config.prefix ? this.chartDetail.config.prefix : '';
+                let suffix = this.chartDetail.config.suffix ? this.chartDetail.config.suffix : '';
+                return prefix + this.chartData + suffix;
             },
             // dimensions为该图表定义的维度
             dimensions: function () {
@@ -231,10 +252,6 @@
                     return columns;
                 }
             },
-            compareTime: [
-                {v: one_hour, t: '一小时前'},
-                {v: one_day, t: '一天前'},
-                {v: one_week, t: '一周前'}],
 
         },
 
@@ -256,42 +273,44 @@
                 };
 
 
-
                 // columns：指标和维度的展示名集合
                 const columns = new Set();
                 columns.add('xAxis');
-                Chart.getViewByChart(1, params)
+                Chart.getViewByChart(params.chartId, params)
                     .then((resp) => {
-                        console.log(`图表${this.chartDetail.name}`,resp);
+                        console.log(`图表${this.chartDetail.name}`, resp);
+                        console.log(this.compareText);
                         this.metricList = resp.metricList;
+                        if (this.needTimeSlice && this.compareMetric) {
+                            // 增加同比
+                            console.log('添加同比，时间间隔', this.compareMetric.v);
+                            params.intervals = [{
+                                startTime: this.queryTime.interval.startTime - this.compareMetric.v,
+                                endTime: this.queryTime.interval.endTime - this.compareMetric.v,
+                            }];
+                            // 获取同比指标
+                            return Chart.getViewByChart(params.chartId, params);
+                        } else {
+                            this.calMetric();
+                        }
+                    })
+                    .then((resp) => {
+                        // 对同比数据进行处理
+                        if (!resp) return;
+                        console.log("同比数据", resp);
+                        resp.metricList.forEach(metric => {
+                            let originData = this.metricList.find(m => m.timestamp === metric.timestamp + this.compareMetric.v).data;
+                            originData.forEach(d => d['同比'] = '当前时间');
+                            metric.data.forEach(d => {
+                                d['同比'] = this.compareMetric.t;
+                                originData.push(d);
+                            });
+                        });
                         this.calMetric();
-                        // stats图表需要特殊处理
-                        // if (this.chartDetail.type === 'stats') {
-                        //     if (this.metricList.length <= 0 || this.metricList[0].data.length <= 0) {
-                        //         this.chartData = 0;
-                        //     } else {
-                        //         this.chartData = this.metricList[0].data[0].amount_sum;
-                        //     }
-                        //     return;
-                        // }
-                        //
-                        // this.chartData.rows = [];
-                        // this.chartData.columns = [];
-                        //
-                        // this.metricList.forEach((result) => {
-                        //     let row = {}, intervalMs = params.intervals[0].endTime - params.intervals[0].startTime;
-                        //     // 如果查询时间间距大于一天，则显示日期
-                        //     row.xAxis = intervalMs >= one_day ? moment(result.timestamp).format('MM/DD H:mm ') : moment(result.timestamp).format('H:mm ');
-                        //     row['下单量'] = result.data.length > 0 ? result.data[0]['下单量'] : 0;
-                        //     // console.log('row:');
-                        //     // console.log(row);
-                        //     this.chartData.rows.push(row);
-                        // });
-                        // this.chartData.columns = Array.from(columns);
-                        // console.log(this.chartData);
-                    }).catch(exp => {
-                        this.$store.dispatch('alert',{type:'info', content:`图表${this.chartDetail.name}数据获取失败`})
-                });
+                    })
+                    .catch(exp => {
+                        this.$store.dispatch('alert', {type: 'info', content: `图表${this.chartDetail.name}数据获取失败`})
+                    });
 
                 // console.log('results');
                 // console.log(this.metricList);
@@ -314,8 +333,7 @@
                     } else {
                         let data = this.metricList[0].data[0];
                         let metricName = this.metrics[0];
-                        console.log('data:');
-                        console.log(data);
+                        console.log('data:', data);
                         console.log(data[metricName]);
                         this.chartData = data[metricName].toString();
                     }
@@ -400,18 +418,25 @@
                 }
                 this.metricList = [];
             },
-            viewReSize: function(newHPx, newWPx) {
-                console.log(`${this.chartDetail.name}开始更新大小`);
-                // 需要计算出图表的实际新高度
+            autoRefresh(time) {
+                this.queryTime.interval.startTime = this.queryTime.interval.startTime + time;
+                this.queryTime.interval.endTime = this.queryTime.interval.endTime + time;
+                this.getMetric();
+            },
+            viewReSize: function (newHPx, newWPx) {
+                console.log(`${this.chartDetail.name}开始更新大小, 容器大小${newHPx}`);
+                //需要计算出图表的实际新高度
                 if (!this.chartDetail || this.chartDetail.type === 'stats') {
                     return;
                 }
                 console.log(this.$refs);
-                let nameHeight = this.$refs['chart-name'].clientHeight;
-                let descHeight = this.$refs['chart-desc'].clientHeight;
+                // let nameHeight = this.$refs['chart-name'].clientHeight;
+                // let descHeight = this.$refs['chart-desc'].clientHeight;
+                let detailHeight = this.$refs['chart-detail'].clientHeight;
                 // let actionHeight = this.$refs['chart-action'].clientHeight;
                 let extraHeight = extraHeights.find(e => e.type === this.chartDetail.type).height;
-                let chartHeight = newHPx - nameHeight - descHeight - extraHeight;
+                // let chartHeight = newHPx - nameHeight - descHeight - extraHeight;
+                let chartHeight = newHPx - detailHeight - extraHeight;
                 this.$nextTick(_ => {
                     let chart = this.$refs[`chart`];
                     if (chart) {
@@ -467,7 +492,8 @@
             }
         }
     }
-    .mycontent{
+
+    .mycontent {
 
     }
 </style>

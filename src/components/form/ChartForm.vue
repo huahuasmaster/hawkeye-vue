@@ -21,7 +21,7 @@
                 v-model="params.datasourceId"
                 :items="datasources"
                 label="数据源"
-                item-text="name"
+                item-text="desc"
                 item-value="id"
                 v-if="this.params.type !== 'funnel'"
         ></v-select>
@@ -29,7 +29,7 @@
                 v-model="params.config.datasourceIds"
                 :items="datasources"
                 label="数据源（多选）"
-                item-text="name"
+                item-text="desc"
                 item-value="id"
                 multiple
                 v-else
@@ -324,8 +324,11 @@
                 }
                 if (this.params.type === 'funnel') {
                     this.params.aggregations = [{
-
-                    }]
+                        alias:"数量",
+                        metric:"count",
+                        metricAggregationType:"COUNT"
+                    }];
+                    this.params.dimensions = [{alias:"名称",dimensionField:"name"}];
                 }
                 Chart.add(this.params)
                     .then(resp => {
