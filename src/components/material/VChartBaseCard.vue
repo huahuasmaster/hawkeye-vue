@@ -10,8 +10,8 @@
             <div class="mycontent">
                 <!--        折线图-->
                 <ve-line :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" :loading="!readyToShow"
-                         ref="chart" judge-width
-                         v-if="chartDetail.type === 'line'" ></ve-line>
+                         ref="chart" judge-width :toolbox="toolbox"
+                         v-if="chartDetail.type === 'line'"></ve-line>
                 <!--        柱状图-->
                 <!--<ve-histogram :data="chartData" :colors="colors" slot="header" :dataZoom="dataZoom" ref="chart" judge-width :xAxis="xAxis"-->
                 <!--v-if="chartDetail.type === 'histogram'" height="360px"></ve-histogram>-->
@@ -28,7 +28,7 @@
             </div>
 
 
-            <v-container style="padding: 0px" align-center justify-center row fill-height ref="chart-detail">
+            <v-container style="padding: 0px" align-space-around justify-center row  ref="chart-detail">
                 <v-layout>
                     <v-flex>
                         <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
@@ -36,8 +36,10 @@
                     </v-flex>
                     <v-spacer></v-spacer>
                     <v-flex
-                            lg4
-                            md4
+                            style="margin-right: 32px"
+
+                            lg3
+                            md3
                             v-if="this.chartDetail.type === 'line'"
                     >
                         <v-select
@@ -50,6 +52,22 @@
 
                         </v-select>
                     </v-flex>
+
+
+                        <!--<v-icon-->
+                                <!--class="mr-2"-->
+                                <!--color="success"-->
+
+                                <!--@click="edit()"-->
+                        <!--&gt;-->
+                            <!--mdi-pencil-->
+                        <!--</v-icon>-->
+                        <v-icon
+                                color="error"
+                                @click="delete1()"
+                        >
+                            mdi-close
+                        </v-icon>
                 </v-layout>
             </v-container>
 
@@ -93,7 +111,41 @@
                 :title="chartDetail.name"
                 :value="wholeStats"
                 sub-icon="mdi-calendar"
-                :sub-text="chartDetail.desc"></material-stats-card>
+                v-on:delete_it="delete1"
+                :sub-text="chartDetail.desc">
+        </material-stats-card>
+        <v-dialog
+                v-model="dialog"
+                max-width="290"
+        >
+            <v-card>
+                <v-card-title class="headline">确认要删除图表?</v-card-title>
+
+                <v-card-text>
+                    该操作无法撤销
+                </v-card-text>
+
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                            color="green darken-1"
+                            flat="flat"
+                            @click="dialog = false"
+                    >
+                        取消
+                    </v-btn>
+
+                    <v-btn
+                            color="red darken-1"
+                            flat="flat"
+                            @click="doDelete"
+                    >
+                        删除
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -102,7 +154,10 @@
     import VeLine from 'v-charts/lib/line.common'
     import VePie from 'v-charts/lib/pie.common'
     import VeFunnel from 'v-charts/lib/funnel.common'
+    import 'v-charts/lib/histogram.common'
     import 'echarts/lib/component/dataZoom'
+    import 'echarts/lib/component/toolbox'
+    import {Dashboard} from "../../url";
 
     let moment = require('moment')
     const thirty_minutes = 1000 * 60 * 30;
@@ -188,7 +243,13 @@
 
                 },
                 first: true,
-                targetHeight: '0px'
+                toolbox: {
+                    feature: {
+                        magicType: {type: ['line', 'bar']},
+                        saveAsImage: {}
+                    }
+                },
+                dialog: false,
             }
         },
 
@@ -253,9 +314,30 @@
                 }
             },
 
+
         },
 
         methods: {
+            edit() {
+                console.log('想要编辑图表' + this.chartDetail.name);
+            },
+            delete1() {
+                // console.log('想要删除图表' + this.chartDetail.name);
+                this.dialog = true;
+            },
+            doDelete() {
+                let dashbordId = this.$route.params.id;
+                let chartId = this.chartDetail.id;
+                Dashboard.delete(dashbordId, chartId)
+                    .then(resp => {
+                        this.$store.dispatch('alert', {type: "success", content: "删除成功"});
+                        this.$emit('delete-chart')
+                    })
+                    .catch(error => {
+                        this.$store.dispatch('alert', {type: "error", content: "删除失败"})
+                    })
+                    .finally(() => this.dialog = false);
+            },
             // 根据传入的图标配置的各项参数获取数据
             getMetric() {
                 if (!this.chartId) return;

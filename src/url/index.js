@@ -43,11 +43,15 @@ export const Dashboard = {
     listChartsByDashboardId: (dashboardId) => instance.get(`/hawkeye/api/dashboards/${dashboardId}/charts`),
     get: dashboardId => instance.get(`/hawkeye/api/dashboards/${dashboardId}`),
     updateLayout: (dashboardId, content) => instance.put(`/hawkeye/api/dashboards/${dashboardId}/layout`, content, {}),
+    delete: (dashboardId, chartId) => instance.delete(`/hawkeye/api/dashboards/${dashboardId}/charts/${chartId}`),
+
 };
 
 export const Datasource = {
     list: () => instance.get(`/hawkeye/api/datasources`),
     listFields: (params) => instance.get(`/hawkeye/api/datasources/fields`, {params}),
     add: (params) => instance.post('/hawkeye/api/datasources/', params, {}),
+    updateEnable: (datasourceId, enable) => instance.put(`/hawkeye/api/datasources/${datasourceId}/enabled`, {enable}, {}),
+    updateDesc: (datasourceId, desc) => instance.put(`/hawkeye/api/datasources/${dashboardId}/desc`, desc, {}),
 
 };

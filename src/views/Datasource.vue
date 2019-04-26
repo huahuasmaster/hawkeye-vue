@@ -51,7 +51,7 @@
                     <td>{{ item.queryGranularity }}</td>
 
                     <td>
-                        <v-switch v-model="item.enable"></v-switch>
+                        <v-switch v-model="item.enable" @change="changeEnabled(item)"></v-switch>
                     </td>
                     <td class="justify-center layout px-0">
                         <v-icon color="success"
@@ -131,7 +131,7 @@
                     <td>{{ item.queryGranularity }}</td>
 
                     <td>
-                        <v-switch v-model="item.enable"></v-switch>
+                        <v-switch v-model="item.enable" @change="changeEnabled(item)"></v-switch>
                     </td>
                     <td class="justify-center layout px-0">
                         <v-icon
@@ -273,6 +273,15 @@
             },
             checkVariables(item) {
 
+            },
+            changeEnabled(item) {
+                Datasource.updateEnable(item.id, item.enable)
+                    .then(resp => {
+                        this.$store.dispatch('alert', {type: "success", content: "修改成功"})
+                    })
+                    .catch(error => {
+                        this.$store.dispatch('alert', {type: "error", content: "修改失败"})
+                    })
             },
             newDatasource(type) {
                 this.showForm = true;

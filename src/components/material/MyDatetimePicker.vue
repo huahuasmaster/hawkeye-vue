@@ -21,14 +21,14 @@
                     style="color: white"
             ></v-text-field>
         </template>
-        <v-date-picker v-model="date" dark v-if="!showTime">
+        <v-date-picker v-model="date" dark v-if="!showTime" @input="confirm">
             <v-spacer></v-spacer>
-            <v-btn flat color="primary" @click="menu = false">Cancel</v-btn>
+            <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
             <v-btn flat color="primary" @click="confirm()">OK</v-btn>
         </v-date-picker>
         <v-time-picker v-model="time" dark v-if="showTime">
             <v-spacer></v-spacer>
-            <v-btn flat color="primary" @click="menu = false">Cancel</v-btn>
+            <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
             <v-btn flat color="primary" @click="confirm()">OK</v-btn>
         </v-time-picker>
     </v-menu>
@@ -67,6 +67,10 @@
                 // console.log(this.wholeDate);
                 // console.log(new Date(this.wholeDate).valueOf());
                 this.$emit('pick_datetime', new Date(this.wholeDate).valueOf());
+                this.menu = false;
+                this.showTime = false;
+            },
+            cancel() {
                 this.menu = false;
                 this.showTime = false;
             },

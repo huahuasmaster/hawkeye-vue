@@ -185,7 +185,9 @@
             },
 
             deleteChart(id) {
-                console.log('想要删除图表' + id);
+                console.log('删除图表' + id);
+                this.getChartDetails();
+                this.refresh();
             },
             resizeEvent: function (i, newH, newW, newHPx, newWPx) {
                 console.log('RESIZE i=' + i + ', H=' + newH + ', W=' + newW + ', H(px)=' + newHPx + ', W(px)=' + newWPx);

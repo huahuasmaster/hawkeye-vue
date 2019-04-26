@@ -41,6 +41,13 @@
         class="caption font-weight-light"
         v-text="subText"
       />
+      <v-spacer></v-spacer>
+      <v-icon
+              color="error"
+              @click="$emit('delete_it')"
+      >
+        mdi-close
+      </v-icon>
     </template>
   </material-card>
 </template>
