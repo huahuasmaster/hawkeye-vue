@@ -42,12 +42,30 @@
         v-text="subText"
       />
       <v-spacer></v-spacer>
-      <v-icon
-              color="error"
-              @click="$emit('delete_it')"
-      >
-        mdi-close
-      </v-icon>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on }">
+          <v-icon
+                  color="info"
+                  v-on="on"
+          >
+            mdi-pencil
+          </v-icon>
+        </template>
+        <v-list>
+          <v-list-tile
+                  key="edit"
+                  @click="$emit('edit_it')"
+          >
+            <v-list-tile-title>编辑</v-list-tile-title>
+          </v-list-tile>
+          <v-list-tile
+                  key="delete"
+                  @click="$emit('delete_it')"
+          >
+            <v-list-tile-title>删除</v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
     </template>
   </material-card>
 </template>

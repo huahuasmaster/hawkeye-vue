@@ -6,6 +6,7 @@
                 label="图表类型"
                 item-text="text"
                 item-value="value"
+                :disabled="isUpdating"
         ></v-select>
         <v-text-field
                 v-model="params.name"
@@ -24,6 +25,7 @@
                 item-text="desc"
                 item-value="id"
                 v-if="this.params.type !== 'funnel'"
+                :disabled="isUpdating"
         ></v-select>
         <v-select
                 v-model="params.config.datasourceIds"
@@ -32,6 +34,7 @@
                 item-text="desc"
                 item-value="id"
                 multiple
+                chips
                 v-else
         ></v-select>
 
@@ -45,8 +48,8 @@
             <!--选择指标字段-->
             <v-layout>
                 <v-flex
-                        md3
-                        lg3
+                        md4
+                        lg4
                         xs12
                 >
                     <v-select
@@ -56,8 +59,8 @@
                     ></v-select>
                 </v-flex>
                 <v-flex
-                        md3
-                        lg3
+                        md4
+                        lg4
                         xs12
                 >
                     <v-select
@@ -69,8 +72,8 @@
                     ></v-select>
                 </v-flex>
                 <v-flex
-                        md3
-                        lg3
+                        md4
+                        lg4
                         xs12
                 >
                     <v-text-field
@@ -79,26 +82,26 @@
                             required
                     ></v-text-field>
                 </v-flex>
-                <v-flex
-                        md3
-                        lg3
-                        xs12
-                >
-                    <v-btn flat color="success" v-if="params.aggregations.length === index + 1"
-                           @click="putNewEmptyAggregation">新增指标
-                    </v-btn>
-                    <v-btn flat color="error" @click="params.aggregations.splice(index, 1)">删除此项</v-btn>
-                </v-flex>
+                <!--<v-flex-->
+                        <!--md3-->
+                        <!--lg3-->
+                        <!--xs12-->
+                <!--&gt;-->
+                    <!--<v-btn flat color="success" v-if="params.aggregations.length === index + 1"-->
+                           <!--@click="putNewEmptyAggregation">新增指标-->
+                    <!--</v-btn>-->
+                    <!--<v-btn flat color="error" @click="params.aggregations.splice(index, 1)">删除此项</v-btn>-->
+                <!--</v-flex>-->
             </v-layout>
         </v-container>
 
         <!------------------------------选择维度（非必填）------------------------------>
         <!--<v-select-->
-                <!--v-model="choosedDimensions"-->
-                <!--:items="choosedDatasource.dimensionList"-->
-                <!--v-if="choosedDatasource.dimensionList.length > 1"-->
-                <!--label="分组维度（非必填）"-->
-                <!--multiple-->
+        <!--v-model="choosedDimensions"-->
+        <!--:items="choosedDatasource.dimensionList"-->
+        <!--v-if="choosedDatasource.dimensionList.length > 1"-->
+        <!--label="分组维度（非必填）"-->
+        <!--multiple-->
         <!--&gt;</v-select>-->
         <v-container
                 v-for="(item,index) in params.dimensions"
@@ -159,7 +162,7 @@
 
         <!--状态图独占属性：前缀与后缀-->
         <v-container
-            v-if="this.params.type === 'stats'"
+                v-if="this.params.type === 'stats'"
         >
             <!--选择指标字段-->
             <v-layout>
@@ -195,13 +198,13 @@
     import {Datasource, Chart} from "../../url";
 
     export default {
-        props: ['dashboardId'],
+        props: ['dashboardId', 'isUpdating', 'targetChart'],
         watch: {
             "params.datasourceId": {
                 handler(to, from) {
-                    console.log(`datasource发生了变更:${this.params.datasourceId}`)
-                    if (this.params.datasourceId !== 0 ) {
-                        if ( this.params.aggregations.length < 1) {
+                    // console.log(`datasource发生了变更:${this.params.datasourceId}`)
+                    if (this.params.datasourceId !== 0) {
+                        if (this.params.aggregations.length < 1) {
                             this.putNewEmptyAggregation();
                         }
                         if (this.params.dimensions.length < 1) {
@@ -210,6 +213,9 @@
                     }
                 },
                 deep: true,
+            },
+            targetChart(to, from) {
+                this.params = this.targetChart;
             }
         },
         computed: {
@@ -226,11 +232,14 @@
             },
             allowDimension() {
                 // 大部分允许维度，只有漏斗图和状态图不允许维度分组
-                return !['funnel', 'stats'].includes(this.params.type);
+                return !['funnel', 'stats', 'line'].includes(this.params.type);
             },
             singleDimension() {
                 // 允许单维度，暂时只有饼图
                 return ['pie'].includes(this.params.type);
+            },
+            singleMetric() {
+                // 只允许单指标：饼图，状态图
             }
         },
         data() {
@@ -245,7 +254,7 @@
                     dimensions: [],
                     filters: [],
                     config: {},
-                    threshold:4,
+                    threshold: 4,
                 },
                 types: [
                     {
@@ -298,7 +307,7 @@
             putNewEmptyDimension() {
                 this.params.dimensions.push({
                     dimensionField: '',
-                    alias:'',
+                    alias: '',
                 });
             },
             clear() {
@@ -319,24 +328,35 @@
                 this.params.dimensions = this.params.dimensions.filter(dimen => dimen.dimensionField && dimen.dimensionField !== '');
                 this.params.dashboardId = this.dashboardId;
                 console.log(this.params);
-                if (this.params.type !== 'pie') {
-                    this.params.threshold = 200;
+                if (this.isUpdating) {
+                    console.log('想要更新的图表id为', this.params.id);
+                    Chart.update(this.params.id, this.params)
+                        .then(resp => {
+                            this.$store.dispatch('alert', {type: "success", content: "更新成功"})
+                            this.$emit('chart_submit', this.params.id);
+                        })
+                } else {
+                    if (this.params.type !== 'pie') {
+                        this.params.threshold = 200;
+                    }
+                    if (this.params.type === 'funnel') {
+                        this.params.aggregations = [{
+                            alias: "数量",
+                            metric: "count",
+                            metricAggregationType: "COUNT"
+                        }];
+                        this.params.dimensions = [{alias: "名称", dimensionField: "name"}];
+                    }
+                    Chart.add(this.params)
+                        .then(resp => {
+                            this.newChartId = resp;
+                            console.log('提交成功,图表id=' + this.newChartId);
+                            this.$emit('chart_submit', this.newChartId);
+                            this.clear();
+                        });
+
                 }
-                if (this.params.type === 'funnel') {
-                    this.params.aggregations = [{
-                        alias:"数量",
-                        metric:"count",
-                        metricAggregationType:"COUNT"
-                    }];
-                    this.params.dimensions = [{alias:"名称",dimensionField:"name"}];
-                }
-                Chart.add(this.params)
-                    .then(resp => {
-                        this.newChartId = resp;
-                        console.log('提交成功,图表id='+this.newChartId);
-                        this.$emit('chart_submit', this.newChartId);
-                        this.clear();
-                    });
+
             },
             getDatasources() {
                 Datasource.list()

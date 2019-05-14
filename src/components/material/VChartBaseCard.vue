@@ -28,7 +28,7 @@
             </div>
 
 
-            <v-container style="padding: 0px" align-space-around justify-center row  ref="chart-detail">
+            <v-container style="padding: 0px" align-space-around justify-center row ref="chart-detail">
                 <v-layout>
                     <v-flex>
                         <h4 class="title font-weight-light" ref="chart-name">{{chartDetail.name}}</h4>
@@ -54,20 +54,43 @@
                     </v-flex>
 
 
-                        <!--<v-icon-->
-                                <!--class="mr-2"-->
-                                <!--color="success"-->
+                    <!--<v-icon-->
+                    <!--class="mr-2"-->
+                    <!--color="success"-->
 
-                                <!--@click="edit()"-->
-                        <!--&gt;-->
-                            <!--mdi-pencil-->
-                        <!--</v-icon>-->
-                        <v-icon
-                                color="error"
-                                @click="delete1()"
-                        >
-                            mdi-close
-                        </v-icon>
+                    <!--@click="edit()"-->
+                    <!--&gt;-->
+                    <!--mdi-pencil-->
+                    <!--</v-icon>-->
+                    <!--<v-icon-->
+                    <!--color="error"-->
+                    <!--@click="delete1()">-->
+                    <!--mdi-close-->
+                    <!--</v-icon>-->
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on }">
+                            <v-icon
+                                    color="info"
+                                    v-on="on"
+                            >
+                                mdi-pencil
+                            </v-icon>
+                        </template>
+                        <v-list>
+                            <v-list-tile
+                                    key="edit"
+                                    @click="edit"
+                            >
+                                <v-list-tile-title>编辑</v-list-tile-title>
+                            </v-list-tile>
+                            <v-list-tile
+                                    key="delete"
+                                    @click="delete1()"
+                            >
+                                <v-list-tile-title>删除</v-list-tile-title>
+                            </v-list-tile>
+                        </v-list>
+                    </v-menu>
                 </v-layout>
             </v-container>
 
@@ -112,6 +135,7 @@
                 :value="wholeStats"
                 sub-icon="mdi-calendar"
                 v-on:delete_it="delete1"
+                v-on:edit_it="edit"
                 :sub-text="chartDetail.desc">
         </material-stats-card>
         <v-dialog
@@ -319,7 +343,8 @@
 
         methods: {
             edit() {
-                console.log('想要编辑图表' + this.chartDetail.name);
+                // console.log('想要编辑图表' + this.chartDetail.name);
+                this.$emit('edit_chart');
             },
             delete1() {
                 // console.log('想要删除图表' + this.chartDetail.name);

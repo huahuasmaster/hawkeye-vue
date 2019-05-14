@@ -40,7 +40,7 @@
 
                     </v-select>
                     <v-btn flat color="success" @click="refresh">刷新</v-btn>
-                    <v-btn flat color="success" @click="showForm = true">新增</v-btn>
+                    <v-btn flat color="success" @click="newChart">新增</v-btn>
                 </v-flex>
             </v-toolbar-items>
         </v-toolbar>
@@ -77,6 +77,7 @@
                        drag-ignore-from=".mycontent" @resized="resizeEvent" :minH="1">
                 <VChartBaseCard :ref="`chart-${item.i}`" @delete-chart="deleteChart"
                                 :chartDetail="dashboardVO.chartList.find(c => c.id === parseInt(item.i))"
+                                v-on:edit_chart="editChart(dashboardVO.chartList.find(c => c.id === parseInt(item.i)))"
                                 :queryInterval="globalInterval" color="white"/>
             </grid-item>
         </grid-layout>
@@ -86,9 +87,9 @@
                         class="headline grey lighten-2"
                         primary-title
                 >
-                    新建图表
+                    {{isUpdating ? '更新图表' : '新建图表'}}
                 </v-card-title>
-                <ChartForm v-on:chart_submit="afterAddChart" :dashboardId="this.dashboardId"></ChartForm>
+                <ChartForm v-on:chart_submit="afterAddChart" :dashboardId="this.dashboardId" :is-updating="isUpdating" :target-chart="targetChart"></ChartForm>
             </v-card>
         </v-dialog>
     </div>
@@ -123,6 +124,8 @@
         },
         data() {
             return {
+                isUpdating: false,
+                targetChart: {},
                 showForm: false,
                 globalInterval: {
                     startTime: moment().startOf('hour').valueOf() - 1000 * 60 * 60,
@@ -151,7 +154,17 @@
             }
         },
         methods: {
-            getChartDetails() {
+            newChart() {
+                this.targetChart = {};
+                this.isUpdating = false;
+                this.showForm = true
+            },
+            editChart(targetChart) {
+                this.isUpdating = true;
+                this.targetChart = targetChart;
+                this.showForm = true;
+            },
+            getChartDetails(chartId) {
                 // Dashboard.listChartsByDashboardId(1)
                 //     .then((resp) => {
                 //         console.log('获取到图表配置');
@@ -166,6 +179,10 @@
                         // setTimeout(() => {
                         //     this.afterGridReady([]);
                         // }, 2000);
+                        if( chartId >= 1) {
+                            console.log('刷新单个图表');
+                            this.$refs[`chart-${chartId}`][0].getMetric();
+                        }
                     })
             },
             injectEndTime(time) {
@@ -186,7 +203,7 @@
 
             deleteChart(id) {
                 console.log('删除图表' + id);
-                this.getChartDetails();
+                this.getChartDetails(-1);
                 this.refresh();
             },
             resizeEvent: function (i, newH, newW, newHPx, newWPx) {
@@ -204,15 +221,13 @@
             },
             afterAddChart(chartId) {
                 this.showForm = false;
-                console.log('图表添加完成id = ' + chartId);
                 let chart = this.layout.find(item => parseInt(item.i) === chartId);
                 if (chart) {
-                    // console.log('修改图表完成', chartId);
-                    // this.getDashboardInfo();
-                    // this.showForm = false;
-                    // this.getDashboardInfo();
+                    this.getChartDetails(chartId);
                     // this.$refs[chartId][0].refresh();
                 } else {
+                    console.log('图表添加完成id = ' + chartId);
+
                     let maxY = 0, newLayout = [];
                     if (this.layout.length > 0) {
                         maxY = this.layout.reduce((item1, item2) => item1.y > item2.y ? item1 : item2).y;
@@ -231,7 +246,7 @@
                     Dashboard.updateLayout(this.dashboardId, newLayout)
                         .then(resp => {
                             console.log("看板配置更新成功");
-                            this.getChartDetails();
+                            this.getChartDetails(-1);
                             this.refresh();
                         })
                     // Dashboard.update(this.dashboardInfo).then(resp => {
@@ -249,7 +264,7 @@
         mounted() {
             this.dashboardId = this.$route.params.id;
             console.log(`当前看板的id为${this.dashboardId}`);
-            this.getChartDetails();
+            this.getChartDetails(-1);
         },
         beforeDestroy() {
             if (this.timer) {
