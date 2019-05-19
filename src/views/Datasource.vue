@@ -58,9 +58,9 @@
                                 class="mr-2"
                                 color="success"
 
-                                @click="editMysql(item)"
+                                @click="checkData(item)"
                         >
-                            mdi-pencil
+                            mdi-eye
                         </v-icon>
                         <v-icon
                                 color="error"
@@ -131,9 +131,9 @@
                                 class="mr-2"
                                 color="success"
 
-                                @click="editMysql(item)"
+                                @click="checkData(item)"
                         >
-                            mdi-pencil
+                            mdi-eye
                         </v-icon>
                         <v-icon
                                 color="error"
@@ -150,14 +150,20 @@
                 <DatasourceForm v-on:add_over="afterAddOver"></DatasourceForm>
             </v-card>
         </v-dialog>
+        <v-dialog v-model="showPreviewTable" width="1500">
+            <v-card>
+                <PreviewDataTable :datasourceId="choosedDatasourceId"></PreviewDataTable>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 <script>
     import DatasourceForm from '../components/form/DatasourceForm'
     import {Datasource} from "../url";
+    import PreviewDataTable from "../components/material/PreviewDataTable";
 
     export default {
-        components: {DatasourceForm},
+        components: {PreviewDataTable, DatasourceForm},
         computed: {
             mysqlItems() {
                 return this.items.filter(item => item.type === 'MYSQL')
@@ -253,12 +259,14 @@
                     {text: 'Actions', value: 'name', sortable: false, align: 'center'}
                 ],
                 showForm: false,
+                showPreviewTable: false,
+                choosedDatasourceId: -1,
             }
         },
         methods: {
-            editMysql(item) {
-                console.log("想要编辑：");
-                console.log(item);
+            checkData(item) {
+                this.choosedDatasourceId = item.id;
+                this.showPreviewTable = true;
             },
             deleteMysql(item) {
                 console.log("想要删除：");

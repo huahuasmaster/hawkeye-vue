@@ -55,7 +55,7 @@
                                 class="mr-2"
                                 color="success"
 
-                                @click="editMysql(item)"
+                                @click="checkData(item)"
                         >
                             mdi-pencil
                         </v-icon>

@@ -54,5 +54,6 @@ export const Datasource = {
     add: (params) => instance.post('/hawkeye/api/datasources/', params, {}),
     updateEnable: (datasourceId, enable) => instance.put(`/hawkeye/api/datasources/${datasourceId}/enabled`, {enable}, {}),
     updateDesc: (datasourceId, desc) => instance.put(`/hawkeye/api/datasources/${dashboardId}/desc`, desc, {}),
+    previewData: (datasourceId) => instance.get(`/hawkeye/api/datasources/${datasourceId}/previewData`),
 
 };

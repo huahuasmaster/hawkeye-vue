@@ -5,6 +5,7 @@
         <MyDatetimePicker :label="'开始时间'" :default-date="new Date().valueOf()" v-on:pick_datetime="params => log(params)"></MyDatetimePicker>
         <VariableTable :fields="items" ref="table"></VariableTable>
         <v-btn block color="success" @click="getItems">提取数据</v-btn>
+        <PreviewDataTable></PreviewDataTable>
     </div>
 </template>
 
@@ -12,9 +13,10 @@
     import VariablePanel from '../components/material/VariablePanel'
     import MyDatetimePicker from '../components/material/MyDatetimePicker';
     import VariableTable from '../components/material/VariableTable'
+    import PreviewDataTable from '../components/material/PreviewDataTable'
 
     export default {
-        components: {VariableTable, VariablePanel, MyDatetimePicker},
+        components: {VariableTable, VariablePanel, MyDatetimePicker,PreviewDataTable},
         data: function () {
             return {
                 colors: [
