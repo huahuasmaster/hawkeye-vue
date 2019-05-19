@@ -155,7 +155,17 @@
         },
         methods: {
             newChart() {
-                this.targetChart = {};
+                this.targetChart = {
+                    type: '',
+                    desc: '',
+                    name: '',
+                    datasourceId: 0,
+                    dashboardId: 0,
+                    aggregations: [],
+                    dimensions: [],
+                    filters: [],
+                    config: {},
+                };
                 this.isUpdating = false;
                 this.showForm = true
             },

@@ -54,13 +54,6 @@
                         <v-switch v-model="item.enable" @change="changeEnabled(item)"></v-switch>
                     </td>
                     <td class="justify-center layout px-0">
-                        <v-icon color="success"
-                                class="mr-2"
-
-                                @click="checkVariables(item)"
-                        >
-                            mdi-alphabetical
-                        </v-icon>
                         <v-icon
                                 class="mr-2"
                                 color="success"

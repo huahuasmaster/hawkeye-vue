@@ -26,7 +26,7 @@
             <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
             <v-btn flat color="primary" @click="confirm()">OK</v-btn>
         </v-date-picker>
-        <v-time-picker v-model="time" dark v-if="showTime">
+        <v-time-picker v-model="time" dark v-if="showTime" format="24hr">
             <v-spacer></v-spacer>
             <v-btn flat color="primary" @click="cancel">Cancel</v-btn>
             <v-btn flat color="primary" @click="confirm()">OK</v-btn>

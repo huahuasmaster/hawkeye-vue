@@ -202,12 +202,15 @@
         watch: {
             "params.datasourceId": {
                 handler(to, from) {
-                    // console.log(`datasource发生了变更:${this.params.datasourceId}`)
+                    console.log(`datasource发生了变更:${this.params.datasourceId}`)
+                    // if(!this.isUpdating) {
+                    //     return;
+                    // }
                     if (this.params.datasourceId !== 0) {
-                        if (this.params.aggregations.length < 1) {
+                        if (!this.params.aggregations || this.params.aggregations.length < 1) {
                             this.putNewEmptyAggregation();
                         }
-                        if (this.params.dimensions.length < 1) {
+                        if (!this.params.dimensions || this.params.dimensions.length < 1) {
                             this.putNewEmptyDimension();
                         }
                     }
@@ -228,11 +231,11 @@
             },
             allowMetric() {
                 // 大部分允许指标，只有漏斗图不允许自定指标（默认为count）
-                return this.params.type !== 'funnel';
+                return  this.params.type && this.params.type !== 'funnel';
             },
             allowDimension() {
                 // 大部分允许维度，只有漏斗图和状态图不允许维度分组
-                return !['funnel', 'stats', 'line'].includes(this.params.type);
+                return  this.params.type && !['funnel', 'stats', 'line'].includes(this.params.type);
             },
             singleDimension() {
                 // 允许单维度，暂时只有饼图
@@ -298,6 +301,8 @@
                 }
             },
             putNewEmptyAggregation() {
+                console.log('新增了度量');
+                this.params.aggregations = [];
                 this.params.aggregations.push({
                     metric: '',
                     alias: '',
@@ -305,6 +310,7 @@
                 });
             },
             putNewEmptyDimension() {
+                this.params.dimensions = [];
                 this.params.dimensions.push({
                     dimensionField: '',
                     alias: '',
